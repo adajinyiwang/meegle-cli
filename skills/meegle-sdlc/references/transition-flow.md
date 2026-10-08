@@ -31,7 +31,7 @@
 
 ## ⑤-2 委派执行
 
-**REQUIRED SUB-SKILL: meegle** — 按其 `references/sop-transition-node.md` 的 STEP 3（直接尝试流转）→ STEP 4（按需补必填字段）→ STEP 5（补充后再流转）执行。输入：`work_item_id`、`project_key`、`node_key`（④ 校验通过节点的 node_key）、`action=confirm`。
+**REQUIRED SUB-SKILL: meegle** — 按其 `references/sop-transition-node.md` 的 STEP 3→4→5（直接尝试流转→按需补必填字段→补充后再流转）执行。输入：`work_item_id`、`project_key`、`node_key`（④ 校验通过节点的 node_key）、`action=confirm`。
 
 本文件不复制其字段补充 / 自愈 / 硬拦截逻辑；硬拦截字段（实际工时、投票类、负责人完成结论等）按该 SOP 转人工处理。
 
