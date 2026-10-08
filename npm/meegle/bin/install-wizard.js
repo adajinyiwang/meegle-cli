@@ -163,7 +163,9 @@ function runCapture(cmd, args, opts = {}) {
 // changes a successful CLI upgrade into a failure.
 function installAgentSkill({ bestEffort = false, runFn = run } = {}) {
   try {
-    runFn("npm", ["exec", "--yes", "--package=skills", "--", "skills", "add", SKILLS_REPO, "-y", "-g"], { timeout: 120000 });
+    // Explicit skill list: new skills must be added here deliberately, so we
+    // never push an unreviewed skill to all users via `--skill '*'`.
+    runFn("npm", ["exec", "--yes", "--package=skills", "--", "skills", "add", SKILLS_REPO, "-y", "-g", "-s", "meegle", "meegle-sdlc"], { timeout: 120000 });
     return true;
   } catch (err) {
     if (!bestEffort) throw err;
