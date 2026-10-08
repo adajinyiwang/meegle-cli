@@ -117,6 +117,8 @@ For fully unattended CI (no human-in-the-loop), inject a token via environment v
 
 The setup wizard installs `skills/meegle/`, a drop-in skill for Trae, Claude Code, Cursor, Windsurf, Gemini CLI, GitHub Copilot CLI, and other agents. It teaches agents how to operate Meegle through this CLI instead of guessing command shapes from prose.
 
+The setup wizard also installs `skills/meegle-sdlc/`, an SDLC orchestration extension on top of the meegle skill. When a task branch name contains a Meegle work item ID (e.g. `feature/2025091234-user-login`), the agent binds the session to that requirement; once development / testing / product work is delivered (merged, confirmed, or finalized), it proposes a user-confirmed workflow-node transition so Feishu Project status stays in sync with real progress.
+
 ### What it covers
 
 - **Command reference** — every `meegle` resource / method with required parameters and examples

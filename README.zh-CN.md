@@ -119,6 +119,8 @@ meegle auth status
 
 安装向导会安装 `skills/meegle/`，这是一份可直接加载到 Trae、Claude Code、Cursor、Windsurf、Gemini CLI、GitHub Copilot CLI 等 Agent 的 skill。它会教 Agent 通过本 CLI 操作 Meegle，而不是从自然语言说明里猜命令形状。
 
+安装向导还会安装 `skills/meegle-sdlc/` —— 基于 meegle skill 的 SDLC 编排扩展。当任务分支名包含工作项 ID（如 `feature/2025091234-user-login`）时，Agent 会自动绑定该飞书项目需求；开发 / 测试 / 产品工作交付（代码合入、测试确认、文档定稿）后，Agent 会在征得你确认的前提下流转对应节点，让飞书项目里的需求状态与实际进度保持同步。
+
 ### 覆盖内容
 
 - **命令参考** — 每个 `meegle` resource / method 的必填参数与示例

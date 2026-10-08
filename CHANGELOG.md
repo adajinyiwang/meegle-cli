@@ -8,6 +8,10 @@ versioned section on each npm release.
 
 ## [Unreleased]
 
+### Added
+
+- New `meegle-sdlc` agent skill, installed alongside the `meegle` skill by the setup wizard and the best-effort updater. It binds a session to the Meegle work item parsed from the git branch name and, after development/testing/product work is delivered (merged or confirmed), proposes a user-confirmed workflow-node transition, delegating execution to the `meegle` skill.
+
 ## [v1.0.23] - 2026-09-08
 
 ### Changed
