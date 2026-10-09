@@ -5,8 +5,8 @@ const os = require("os");
 const path = require("path");
 const readline = require("readline");
 
-const PKG = "@lark-project/meegle";
-const SKILLS_REPO = "larksuite/meegle-cli";
+const PKG = "@didatravel/meegle";
+const SKILLS_REPO = "adajinyiwang/meegle-cli";
 const DEFAULT_HOST = "meegle.com";
 const PRESET_HOSTS = [
   { label: "Feishu Project (project.feishu.cn)", value: "project.feishu.cn" },

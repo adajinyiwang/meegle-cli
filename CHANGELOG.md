@@ -12,6 +12,10 @@ versioned section on each npm release.
 
 - New `meegle-sdlc` agent skill, installed alongside the `meegle` skill by the setup wizard and the best-effort updater. It binds a session to the Meegle work item parsed from the git branch name and, after development/testing/product work is delivered (merged or confirmed), proposes a user-confirmed workflow-node transition, delegating execution to the `meegle` skill.
 
+### Changed
+
+- Renamed the distribution channel: the npm package is now `@didatravel/meegle` (was `@lark-project/meegle`) and Agent Skills are installed from the `adajinyiwang/meegle-cli` GitHub repository. The quick-start command is now `npx @didatravel/meegle@latest install`. The CLI command name (`meegle`) and Go module path are unchanged.
+
 ## [v1.0.23] - 2026-09-08
 
 ### Changed

@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D16-brightgreen.svg)](https://nodejs.org/)
-[![npm version](https://img.shields.io/npm/v/@lark-project/meegle.svg)](https://www.npmjs.com/package/@lark-project/meegle)
+[![npm version](https://img.shields.io/npm/v/@didatravel/meegle.svg)](https://www.npmjs.com/package/@didatravel/meegle)
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
@@ -51,14 +51,14 @@ Command-line tool for [Meegle](https://meegle.com?utm_source=github&utm_medium=r
 Run the setup wizard:
 
 ```bash
-npx @lark-project/meegle@latest install
+npx @didatravel/meegle@latest install
 ```
 
 The wizard installs or upgrades the CLI globally, installs the AI Agent Skill, configures the Meegle host, and starts login.
 
 ### Automatic update prompt
 
-The npm-distributed CLI checks npm for a newer version at most once every 24 hours when it starts in an interactive terminal. When an update is available, it reads the released `Added` and `Changed` entries between the installed and latest versions from the [CHANGELOG](https://github.com/larksuite/meegle-cli/blob/main/CHANGELOG.md#changed), then shows an interactive prompt:
+The npm-distributed CLI checks npm for a newer version at most once every 24 hours when it starts in an interactive terminal. When an update is available, it reads the released `Added` and `Changed` entries between the installed and latest versions from the [CHANGELOG](https://github.com/adajinyiwang/meegle-cli/blob/main/CHANGELOG.md#changed), then shows an interactive prompt:
 
 ```text
 ✨ Meegle CLI update available: v<current> → v<latest>
@@ -72,7 +72,7 @@ What's new:
   Use ↑/↓ to select, then press Enter
 ```
 
-Pressing Enter first upgrades the CLI with `npm install -g @lark-project/meegle@latest`, then makes a best-effort attempt to upgrade the Meegle Agent Skill through the same installer used by `meegle install`, and finally continues the original command. A missing or incompatible Skill installer, or a Skill download failure, never changes a successful CLI upgrade into a failure. Choosing **Remind me later** defers the next check for 24 hours. This lightweight update does not reconfigure the host or trigger login; use `meegle install` when you want the full setup wizard.
+Pressing Enter first upgrades the CLI with `npm install -g @didatravel/meegle@latest`, then makes a best-effort attempt to upgrade the Meegle Agent Skill through the same installer used by `meegle install`, and finally continues the original command. A missing or incompatible Skill installer, or a Skill download failure, never changes a successful CLI upgrade into a failure. Choosing **Remind me later** defers the next check for 24 hours. This lightweight update does not reconfigure the host or trigger login; use `meegle install` when you want the full setup wizard.
 
 The check is skipped for non-interactive/CI execution, piped stdout, `install`, and shell-completion commands, so structured command output remains unchanged. Set `MEEGLE_NO_UPDATE_CHECK=1` to disable it explicitly.
 
@@ -82,7 +82,7 @@ The check is skipped for non-interactive/CI execution, piped stdout, `install`, 
 
 ```bash
 # 1. Install CLI + Skill, configure host, and log in
-npx @lark-project/meegle@latest install
+npx @didatravel/meegle@latest install
 
 # 2. View this week's to-dos
 meegle mywork todo --action this_week --page-num 1
@@ -100,7 +100,7 @@ meegle inspect workitem.create
 The default browser OAuth flow requires a real TTY. In CI runners, pipes, and agent shells like Claude Code, run the same setup wizard with an explicit host and Device Code login:
 
 ```bash
-npx -y @lark-project/meegle@latest install --host <host> --device-code --lang en
+npx -y @didatravel/meegle@latest install --host <host> --device-code --lang en
 ```
 
 Examples of `<host>`: `project.feishu.cn`, `meegle.com`, or your self-hosted tenant domain such as `your-tenant.example.com`. The Device Code flow prints an authorization URL; send it to the user and keep the command running until authorization completes.
@@ -1059,11 +1059,11 @@ By using this tool you are deemed to voluntarily assume all related responsibili
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=larksuite/meegle-cli&type=Date)](https://star-history.com/#larksuite/meegle-cli&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=adajinyiwang/meegle-cli&type=Date)](https://star-history.com/#adajinyiwang/meegle-cli&Date)
 
 ## Contributing
 
-Community contributions are welcome. For bugs and feature requests, open an [Issue](https://github.com/larksuite/meegle-cli/issues) or [Pull Request](https://github.com/larksuite/meegle-cli/pulls). For major changes, please start a discussion via an Issue first.
+Community contributions are welcome. For bugs and feature requests, open an [Issue](https://github.com/adajinyiwang/meegle-cli/issues) or [Pull Request](https://github.com/adajinyiwang/meegle-cli/pulls). For major changes, please start a discussion via an Issue first.
 
 ## License
 

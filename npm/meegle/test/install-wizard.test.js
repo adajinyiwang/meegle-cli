@@ -17,7 +17,7 @@ test("installAgentSkill requests the explicit skill list (meegle + meegle-sdlc)"
     "exec", "--yes", "--package=skills", "--", "skills",
   ]);
   assert.ok(args.includes("add"));
-  assert.ok(args.includes("larksuite/meegle-cli"));
+  assert.ok(args.includes("adajinyiwang/meegle-cli"));
   assert.ok(args.includes("-y"));
   assert.ok(args.includes("-g"));
 
