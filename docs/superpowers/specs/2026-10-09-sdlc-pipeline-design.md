@@ -22,6 +22,7 @@ PRD《V2.25 AI SDLC》要求以 AI 命令驱动研发流水线：从飞书项目
 | 节点映射 | dida 4 个固定节点名为默认值；权威源永远是运行时 `get-node ["_all"]` 实时查询 |
 | update 命令 | 不进 skill——已由 update-notifier / skills CLI 幂等更新覆盖，SKILL.md 仅留一句指引 |
 | 安装器策略 | 显式列表增为 `-s meegle meegle-sdlc sdlc-pipeline`（新 skill 显式过安装器评审） |
+| 安装名更换 | **仅发布链路层**改名：npm 包 `@lark-project/meegle` → `@didatravel/meegle`；GitHub 仓库 `larksuite/meegle-cli` → `adajinyiwang/meegle-cli`（用户指定 https://github.com/adajinyiwang/meegle-cli.git）。Go module path（`github.com/larksuite/meegle-cli`）与 CLI 命令名 `meegle` **不动**——前者不影响链路通断，后者用户选择保留 |
 | 与 meegle-sdlc 共存 | meegle-sdlc 的 branch-binding.md「静默不启用清单」加一条：会话已由 /sdlc-start 驱动时，自动流转建议让位给 pipeline 命令（防重复确认卡片；一行改动，需过其自身回归） |
 
 ## 3. 定位与依赖
@@ -113,15 +114,36 @@ description: |
 5. 如实报告：push/流转返回 success ≠ 成功，回读为准；未变化按失败报告。
 6. 合理化对策表 + Red Flags：延续 meegle-sdlc 的格式，RED 测试中按实际借口补充。
 
-## 9. 发布集成（与 meegle-sdlc 完全同构）
+## 9. 发布集成（含安装名更换）
+
+### 9.1 改名触点（仅发布链路层；旧值 → 新值）
+
+| 位置 | 旧值 | 新值 |
+|---|---|---|
+| `npm/meegle/package.json`：name | `@lark-project/meegle` | `@didatravel/meegle` |
+| `npm/meegle/package.json`：homepage / repository.url / bugs.url | `github.com/larksuite/meegle-cli…` | `github.com/adajinyiwang/meegle-cli…` |
+| `npm/meegle/bin/install-wizard.js:8` `PKG` | `@lark-project/meegle` | `@didatravel/meegle` |
+| `npm/meegle/bin/install-wizard.js:9` `SKILLS_REPO` | `larksuite/meegle-cli` | `adajinyiwang/meegle-cli` |
+| `npm/meegle/bin/update-notifier.js`：`PKG`、`CHANGELOG_URL`、`CHANGELOG_RAW_URL` 及 4 处消息文案中的包名字面量 | `@lark-project/meegle`、`…/larksuite/meegle-cli/…` | `@didatravel/meegle`、`…/adajinyiwang/meegle-cli/…` |
+| `npm/meegle/bin/meegle.js:37` 重装提示 | `npm i -g @lark-project/meegle` | `npm i -g @didatravel/meegle` |
+| `npm/meegle/test/install-wizard.test.js:20` 断言 | `larksuite/meegle-cli` | `adajinyiwang/meegle-cli` |
+| `npm/meegle/test/update-notifier.test.js`（如有包名/URL 断言） | 同上模式 | 同上模式 |
+| `README.md` / `README.zh-CN.md`：npm 徽章、npx 命令（3 处/文件）、仓库链接 | 旧名 | 新名 |
+| `THIRD_PARTY_NOTICES.md:3` 包名提及 | `@lark-project/meegle` | `@didatravel/meegle` |
+
+**不改**：`go.mod` module path、Go import、`.golangci.yml`、CLI 命令名/二进制名 `meegle-*`、Makefile、CHANGELOG 历史条目（历史记录指向旧仓库属事实陈述，保留）。
+
+前置条件（发布时由用户保证，不在实现范围）：npmjs 拥有 `didatravel` scope；`adajinyiwang/meegle-cli` 为公开仓库且含 `skills/` 目录（skills CLI 纯 HTTP 安装依赖）。
+
+### 9.2 sdlc-pipeline 发布（与 meegle-sdlc 同构）
 
 1. `skills/sdlc-pipeline/` 与现有 skills 平级，进仓库即进分发源。
-2. `npm/meegle/bin/install-wizard.js`：`installAgentSkill()` 参数增为 `-s meegle meegle-sdlc sdlc-pipeline`；`update-notifier.js` 共享函数自动继承；`npm/meegle/test/install-wizard.test.js` 断言更新为三元素列表。
-3. CHANGELOG `[Unreleased] → ### Added` 记一条；双语 README「AI Agent Skill」章节各补一段。
+2. `install-wizard.js`：`installAgentSkill()` 的 `-s` 列表增为 `meegle meegle-sdlc sdlc-pipeline`；`update-notifier.js` 共享函数自动继承；`install-wizard.test.js` 断言更新为三元素列表。
+3. CHANGELOG `[Unreleased] → ### Added` 记 sdlc-pipeline 一条、`### Changed` 记改名一条；双语 README「AI Agent Skill」章节各补一段。
 4. 版本跟随 CLI（`npm/meegle/package.json` 单一来源），无独立版本。
 5. meegle-sdlc 联动改动：`skills/meegle-sdlc/references/branch-binding.md` 静默不启用清单 +1 条（见 §2）。
 
-发布流程不变：PR → main → `make meegle-all` → npm publish。不触碰 Go 代码。
+发布流程不变：PR → main → `make meegle-all` → npm publish（新包名首发需 `npm publish --access public`，scoped 包默认 private）。不触碰 Go 代码。
 
 ## 10. 测试策略（writing-skills 的 RED-GREEN-REFACTOR）
 
@@ -141,7 +163,8 @@ dolphin 服务侧全部、飞书 IM 推送（飞书自身自动化覆盖）、gi
 1. `skills/sdlc-pipeline/` 五文件（SKILL.md + 4 references）结构符合 §4，SKILL.md < 250 行；
 2. RED 基线记录在案，GREEN 与 6 个压力场景全部通过；
 3. `npm test` 通过，安装器参数断言含三 skill 列表；
-4. CHANGELOG `[Unreleased]`、双语 README 已更新；
-5. meegle-sdlc 联动一行改动完成且其自身回归通过；
-6. 全流程不复制 meegle / meegle-sdlc 的执行细节与纪律文本，仅委派/跨引用；
-7. team-conventions.md 中 `<待确认>` 占位处均有明确的「询问用户」兜底路径描述。
+4. 改名触点（§9.1 表）全部替换完成，`npm/meegle/` 与双语 README 中 `grep larksuite/meegle-cli` 和 `grep @lark-project/meegle` 零命中（CHANGELOG 历史条目除外）；
+5. CHANGELOG `[Unreleased]`、双语 README 已更新；
+6. meegle-sdlc 联动一行改动完成且其自身回归通过；
+7. 全流程不复制 meegle / meegle-sdlc 的执行细节与纪律文本，仅委派/跨引用；
+8. team-conventions.md 中 `<待确认>` 占位处均有明确的「询问用户」兜底路径描述。
