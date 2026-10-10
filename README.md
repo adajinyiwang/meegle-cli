@@ -119,6 +119,8 @@ The setup wizard installs `skills/meegle/`, a drop-in skill for Trae, Claude Cod
 
 The setup wizard also installs `skills/meegle-sdlc/`, an SDLC orchestration extension on top of the meegle skill. When a task branch name contains a Meegle work item ID (e.g. `feature/2025091234-user-login`), the agent binds the session to that requirement; once development / testing / product work is delivered (merged, confirmed, or finalized), it proposes a user-confirmed workflow-node transition so Feishu Project status stays in sync with real progress.
 
+The repository also ships `sdlc-pipeline`, a command-driven AI SDLC skill. It exposes `/sdlc-start`, `/sdlc-next`, `/sdlc-done`, and `/sdlc-status` to drive a Feishu Project (Meegle) requirement end-to-end: check out the requirement's code branch, upload design docs / test cases / test results to `docs/sdlc/<ID>/` in git, break the requirement into estimated tasks, and transition the workflow nodes — with explicit user confirmation before every push and every node transition. It builds on the `meegle` skill for execution and shares `meegle-sdlc`'s confirmation/read-back discipline.
+
 ### What it covers
 
 - **Command reference** — every `meegle` resource / method with required parameters and examples

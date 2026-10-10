@@ -11,6 +11,7 @@ versioned section on each npm release.
 ### Added
 
 - New `meegle-sdlc` agent skill, installed alongside the `meegle` skill by the setup wizard and the best-effort updater. It binds a session to the Meegle work item parsed from the git branch name and, after development/testing/product work is delivered (merged or confirmed), proposes a user-confirmed workflow-node transition, delegating execution to the `meegle` skill.
+- Added the `sdlc-pipeline` Agent Skill: a command-driven AI SDLC pipeline (`/sdlc-start`, `/sdlc-next`, `/sdlc-done`, `/sdlc-status`) that drives a Feishu Project (Meegle) requirement through branch checkout, document upload to git (`docs/sdlc/<ID>/`), task breakdown with estimates, and workflow node transitions. It delegates execution to the `meegle` skill and reuses `meegle-sdlc`'s transition discipline. `meegle install` now installs all three skills (`-s meegle meegle-sdlc sdlc-pipeline`).
 
 ### Changed
 

@@ -121,6 +121,8 @@ meegle auth status
 
 安装向导还会安装 `skills/meegle-sdlc/` —— 基于 meegle skill 的 SDLC 编排扩展。当任务分支名包含工作项 ID（如 `feature/2025091234-user-login`）时，Agent 会自动绑定该飞书项目需求；开发 / 测试 / 产品工作交付（代码合入、测试确认、文档定稿）后，Agent 会在征得你确认的前提下流转对应节点，让飞书项目里的需求状态与实际进度保持同步。
 
+仓库同时提供 `sdlc-pipeline`——命令式 AI SDLC 流水线 skill。通过 `/sdlc-start`、`/sdlc-next`、`/sdlc-done`、`/sdlc-status` 驱动飞书项目（Meegle）需求全链路：拉取需求代码分支、将设计文档/测试用例/测试结果上传到 git 的 `docs/sdlc/<需求ID>/`、拆分任务并估分排期、流转工作流节点——每次 push 与节点流转前都需用户明确确认。执行委派 `meegle` skill，确认/回读纪律与 `meegle-sdlc` 单源共享。
+
 ### 覆盖内容
 
 - **命令参考** — 每个 `meegle` resource / method 的必填参数与示例

@@ -3,7 +3,7 @@ const test = require("node:test");
 
 const { installAgentSkill } = require("../bin/install-wizard.js");
 
-test("installAgentSkill requests the explicit skill list (meegle + meegle-sdlc)", () => {
+test("installAgentSkill requests the explicit skill list (meegle + meegle-sdlc + sdlc-pipeline)", () => {
   const calls = [];
   const result = installAgentSkill({
     runFn: (cmd, args) => { calls.push({ cmd, args }); },
@@ -23,5 +23,5 @@ test("installAgentSkill requests the explicit skill list (meegle + meegle-sdlc)"
 
   const sIndex = args.indexOf("-s");
   assert.ok(sIndex !== -1, "expected explicit -s skill list");
-  assert.deepStrictEqual(args.slice(sIndex + 1, sIndex + 3), ["meegle", "meegle-sdlc"]);
+  assert.deepStrictEqual(args.slice(sIndex + 1, sIndex + 4), ["meegle", "meegle-sdlc", "sdlc-pipeline"], "expected explicit -s skill list");
 });
