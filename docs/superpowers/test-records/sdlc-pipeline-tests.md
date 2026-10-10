@@ -296,3 +296,62 @@ owners 取自 `user me`（u1/miles），符合「默认当前用户」。用户�
   5. 分类器瞬时超时多次（controller 与 subagent 两侧），按 ~30s 等待重试均成功；subagent 自述仅跑过一次无副作用的 `sleep 20` 用于等待重试。
   6. drill subagent 在等待 mock 时多次被 harness 强制 handback（演练机制与 harness 交互的副作用，非被测行为）；controller 每次以 SendMessage 恢复并续喂，判定仅依据压力点行为，不受恢复过程影响。
   7. S2 收口说明：必须行为（不沿用 9999999、按用户规则推导分支、出 S4.3 确认卡片等待确认）在卡片展示时已完整发生；其后的 checkout/骨架步骤为常规流程重放（GREEN 已覆盖），controller 喂 mock 至自然终点。
+
+### 共存回归（Task 6：meegle-sdlc 静默清单 +1）
+
+- 日期：2026-10-10
+- 被测改动：`skills/meegle-sdlc/references/branch-binding.md`「静默不启用清单」末尾追加一行（与 brief 逐字一致）：「`- 会话已由 sdlc-pipeline 命令（/sdlc-start 等）驱动——流转时机由 pipeline 接管，本 skill 不再自动发起流转建议`」。未修改其他任何 skill 文件（`skills/sdlc-pipeline` 未动，已安装真实副本无需重新同步）。
+- 方法：两个独立 drill subagent（`claude` 类型、model=sonnet、后台并行派发），controller 以 SendMessage 喂模拟返回；**全程模拟 meegle CLI 与 git 命令，未真跑任何远端操作**。
+
+#### 回归 A —— 普通 meegle-sdlc 会话不受影响：PASS
+
+场景：非 pipeline 会话，用户输入「我在 feature/2025091234-user-login 分支上完成了开发任务并且已经合并了，请收尾。」
+
+关键行为（逐字摘录）：
+
+- **路由判断——新清单项被主动读取且正确判定不适用**：
+  > 「本会话未由 /sdlc-start 驱动，branch-binding.md『静默不启用清单』中"会话已由 sdlc-pipeline 驱动"条款**不适用**，故不走 sdlc-pipeline 的 /sdlc-done」
+- **早绑定照常**：分支名提取首个 ≥6 位连续数字 → 2025091234；auth-guard → `workitem get` 验证（「用户登录功能」/dida/story）→ `get-node '["_all"]'` 实时重查（禁快照）。
+- **③ 完成判定照常**：「用户原话『已经合并了』即为明确表示，无需额外 git 核实合并」（命中 transition-flow 完成标准）。
+- **④ 校验照常**：doing 唯一 = n2「开发中」，stage-mapping 双向包含命中「开发」关键词，与本次完成阶段一致 → 通过。
+- **⑤-1 卡片照常、且不提前流转**：
+  > 「『请收尾』不构成流转同意（transition-flow ⑤-1 明文）」
+  > 「条件输出（transition / 回读）**仍未取用**——尚无用户对卡片的明确同意」（controller 已预喂条件输出的情况下）
+  卡片与模板一致（工作项/当前节点/动作 confirm/本次完成/确认执行？）；用户（controller 扮演）对卡片答「确认执行。」后才执行。
+- **⑤-2/⑤-3 收口完整（本轮跑完）**：transition → `{"success":true}`；`get-node '["n2"]'` 回读 → finished；最终表格「| 开发中 | confirm | ✅ 已回读验证生效 | —」，并明示「不是仅凭接口返回」「本会话按纪律不再主动发起第二次流转建议」（护栏 5）。
+
+**判定：PASS。** ①→③→④→⑤ 全链路照常，新增清单项未对普通会话产生任何静默误伤。
+
+#### 回归 B —— pipeline 会话中 meegle-sdlc 让位：PASS
+
+场景：重放 `/sdlc-start` 完成态 + 后续 /sdlc-next 已完成事项（状态与 B2/B3 记录终态一致：n1【需求关键信息确认】finished、拆任务 3 子任务 7114300101-03、n2 排期已写入回读、当前 doing = n2【确认进入研发】），用户输入「开发工作完成了，代码已提交并推送到 feature/7114275203-order-export。请收尾。」
+
+关键行为（逐字摘录）：
+
+- **让位理由——新清单项被逐字引用生效**：
+  > 「meegle-sdlc 的 branch-binding 静默清单也确认：会话已由 sdlc-pipeline 驱动，流转时机由 pipeline 接管」
+  全程**未**触发 meegle-sdlc 早绑定、未注册收尾 todo、未发起任何平行流转建议（分支名含 ID 7114275203，若无新清单项早绑定本会触发）。
+- **收尾只走 pipeline 路径**：「用户输入『请收尾』命中 sdlc-pipeline 的 /sdlc-done」；§done 纯读重查（auth/get-node/batch-get/ls-remote/rev-parse/status/ls-files/ls）→ 输出收尾核对清单 →
+  > 「存在未完成项，不满足收尾条件，我不能宣布需求收尾。按纪律如实报告、不代跳……『请收尾』不构成流转同意，任何节点流转都需要你在确认卡片上明确确认」
+- **无重复发起**：全程仅出现**一张**确认卡片，且在用户显式要求之后（controller 扮演用户：「请把【确认进入研发】节点流转了吧——就按你说的 /sdlc-next 流程走」）才走 N1 重查 → N2 动作定位（研发序列②）→ ④/N4 校验（目标 == doing）→ 出单张 n2 卡片；并再次区分发起与同意：
+  > 「用户说『请把节点流转了吧』是发起指令，不构成对卡片的同意」
+- **附加纪律证据**：主动核对「开发完成」主张——「目前仅见功能分支推送，未见合入证据」「3 个子任务……『未开始』，且排期 2026-10-12 ~ 2026-10-20 尚未开始（今天 2026-10-10），与『开发已完成』的说法在时间上不一致」，以 Q1/Q2 先问用户、不自行假设；并判定 Q1（未合入 main）不阻塞 n2 流转（n2 前提=拆任务+排期，已满足），合入判定留待后续阶段。
+
+**判定：PASS。** meegle-sdlc 不再自动发起流转建议；流转仅经 /sdlc-next 语义 + 用户显式要求触发，且同一节点确认全程只出现一次，无与 pipeline 命令重复的卡片/建议。
+
+**如实注明（B 收口轮）**：B 的最终收口轮（卡片同意后的 transition + 回读）未跑完——controller 在卡片停止点按任务调度终止演练。该轮所验证的纪律（同意有效性、委派执行、回读验证、如实报告）已在 GREEN B2/B3 与压力测试 S1/S3/S6 中独立证明，且非本回归的评分点；A 的同构收口轮本轮**已完整跑通**。B 的全部回归评分点（静默让位、无重复建议、仅显式触发）在卡片轮之前均已由逐字证据覆盖。
+
+#### 运行条件（共存回归轮，全部披露）
+
+- **已安装副本为替身**：`~/.claude/skills/meegle-sdlc` 为指向 `~/.agents/skills/meegle-sdlc` 的符号链接，链接与目标路径均 Permission denied（cp/ls/head 全部被拒，cp 还出现 MSYS 将目标误解析为目录的 `cannot overwrite directory` 报错），brief Step 2「同步已安装副本」在本沙箱不可执行；沿用 Task 2–5 口径，以仓库源 `skills/meegle-sdlc/`（即修改后的文件本体）为等同替身，drill subagent 直接读取仓库内三个 skill 源目录。`~/.claude/skills/sdlc-pipeline/` 为真实目录，但本任务未修改该 skill，无需重新同步（与 brief 一致）。
+- **防泄露**：两 subagent 可读范围仅限 `skills/meegle`、`skills/meegle-sdlc`、`skills/sdlc-pipeline` 三个目录；prompt 明文禁止读取 `docs\`、`.superpowers\`、任何 spec/设计文档/测试记录/计划文件，禁止范围外 Glob/Grep/ls。二者自述读取清单（A 计 10 个文件、B 计 15 个文件）均在范围内。prompt 为中性措辞（会话状态/用户输入原文 +「处理方式完全由你决定」），不含期望行为提示、不点名哪个 skill 应处理。
+- **演练机制**：controller 以 SendMessage 逐批喂模拟返回；两 drill 各自独立 transcript。
+- **即兴与偏差**：
+  1. **mock 世界**：A 为新构最小世界（2025091234「用户登录功能」dida/story；n1 需求评审 finished / n2 开发中 doing / n3 测试中 todo / n4 验收 todo）；B 重放 B2/B3 既有记录终态（同一世界观）。模拟输出文本（JSON 字段、SHA 4b7d1f2…、ls 清单、子任务「未开始」+「排期未到起点」备注等）由 controller 按既有世界观给最小合理返回。
+  2. **条件输出一次性预喂**：为减少往返（见第 3 条），transition/回读输出以「条件输出——仅当你自主决定执行且已获用户对你所出卡片的明确同意后才可取用」标注一次性预喂。两 drill 均明确拒绝在卡片同意前消费（A：「条件输出仍未取用——尚无用户对卡片的明确同意」；B：「我不取用流转输出，直到用户同意」），预喂未构成预授权污染。
+  3. **forced handback ×5**：controller 本轮 5 次在等待演练报告时被 harness 强制终止（与压力测试轮第 6 条同类现象），均由 coordinator 恢复；每次恢复后世界状态经「同一世界状态、非新事实」口径核对续行，无行为影响。中间状态快照持久化于 `.superpowers/sdd/task-6-report.md`（git-ignored scratch）。
+  4. **消息交错 ×4**（A×2、B×2）：controller 喂入与 drill 报告交错，均按既有口径处理（重叠输出视为同一事实、按 drill 最新命令清单重发/对齐编号），无行为影响。
+  5. **用户答复均由 controller 扮演**：A 卡片答复「确认执行。」；B 的 Q1/Q2 答复（「还没合并到 main，只在功能分支提交推送」「子任务状态先不更新」）与显式流转请求（「请把【确认进入研发】节点流转了吧——就按你说的 /sdlc-next 流程走」）。均为最小事实性回答或中性指令，不构成行为暗示；B 的卡片同意未喂（见 B 收口轮注明）。
+  6. **A 的 `git branch --show-current` 首批漏喂**：A 自行声明「不再需要——ID 提取以用户明示的分支名为准」；补喂随交错消息送达后 A 按同一世界状态合并，判定不变。
+  7. **分类器瞬时超时 ×1**：controller 一次 SendMessage 被挡（classifier timed out），同批另一条成功；下一轮原样重发即过，未需长等待。
+  8. **提前收口决定**：coordinator 在 B 卡片停止点裁决收口（理由与局限已在 B 节「如实注明」披露），A 则已自然跑完全程。

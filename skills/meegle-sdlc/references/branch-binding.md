@@ -53,5 +53,6 @@ meegle workflow get-node --work-item-id <ID> --node-id-list '["_all"]' --project
 - ID 验证失败且追问一次未获得有效 ID
 - 不在 git 仓库中
 - 用户明确表示本任务不关联飞书项目
+- 会话已由 sdlc-pipeline 命令（/sdlc-start 等）驱动——流转时机由 pipeline 接管，本 skill 不再自动发起流转建议
 
 静默不启用时：不注册 todo，本会话不再提及本 skill。
