@@ -217,7 +217,7 @@ function semverLessThan(a, b) {
 function getGloballyInstalledVersion() {
   try {
     const out = runSilent("npm", ["list", "-g", PKG, "--depth=0"], { timeout: 15000 });
-    const match = out.match(/@lark-project\/meegle@([^\s]+)/);
+    const match = out.match(new RegExp(PKG.replace(/\//g, "\\/") + "@([^\\s]+)"));
     return match ? match[1] : "unknown";
   } catch (_) {
     return null;
