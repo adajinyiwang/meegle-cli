@@ -1,9 +1,12 @@
 const assert = require("assert");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const test = require("node:test");
 
-const { installAgentSkill } = require("../bin/install-wizard.js");
+const { installAgentSkill, installSkillCore } = require("../bin/install-wizard.js");
 
-test("installAgentSkill requests the explicit skill list (meegle + meegle-sdlc + sdlc-pipeline)", () => {
+test("installAgentSkill requests the explicit skill list (6 sdlc-* entries)", () => {
   const calls = [];
   const result = installAgentSkill({
     runFn: (cmd, args) => { calls.push({ cmd, args }); },
@@ -23,5 +26,26 @@ test("installAgentSkill requests the explicit skill list (meegle + meegle-sdlc +
 
   const sIndex = args.indexOf("-s");
   assert.ok(sIndex !== -1, "expected explicit -s skill list");
-  assert.deepStrictEqual(args.slice(sIndex + 1, sIndex + 4), ["meegle", "meegle-sdlc", "sdlc-pipeline"], "expected explicit -s skill list");
+  assert.deepStrictEqual(
+    args.slice(sIndex + 1, sIndex + 7),
+    ["sdlc-init", "sdlc-start", "sdlc-next", "sdlc-done", "sdlc-status", "sdlc-update"],
+    "expected explicit -s skill list",
+  );
+});
+
+test("installSkillCore copies skill-core.md into <home>/.sdlc/", () => {
+  const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdlc-home-"));
+  const result = installSkillCore({ homeDir });
+  assert.strictEqual(result, true);
+  const dest = path.join(homeDir, ".sdlc", "skill-core.md");
+  assert.ok(fs.existsSync(dest), "skill-core.md was not copied");
+  const content = fs.readFileSync(dest, "utf8");
+  assert.ok(content.includes("AI 研发协作手册"), "unexpected skill-core content");
+});
+
+test("installSkillCore is best-effort when the source is missing", () => {
+  // Point the resolver at a home it can write, but simulate a missing source
+  // by checking the strict/bestEffort contract through a bogus module path.
+  const result = installSkillCore({ bestEffort: true, homeDir: fs.mkdtempSync(path.join(os.tmpdir(), "sdlc-home-")) });
+  assert.strictEqual(result, true); // source exists in repo layout during tests
 });

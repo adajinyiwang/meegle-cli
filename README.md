@@ -115,30 +115,21 @@ For fully unattended CI (no human-in-the-loop), inject a token via environment v
 
 ## AI Agent Skill
 
-The setup wizard installs `skills/meegle/`, a drop-in skill for Trae, Claude Code, Cursor, Windsurf, Gemini CLI, GitHub Copilot CLI, and other agents. It teaches agents how to operate Meegle through this CLI instead of guessing command shapes from prose.
+The setup wizard installs the **dida-sdlc** skill suite (`skills/sdlc-*/`): six thin entries — `/sdlc-init`, `/sdlc-start`, `/sdlc-next`, `/sdlc-done`, `/sdlc-status`, `/sdlc-update` — for Claude Code and other skill-capable agents, backed by the `sdlc` CLI bundled in this package (installed as a second global command next to `meegle`). Together they drive a Feishu Project (Meegle) requirement end-to-end: bind a requirement to a branch, save and hand off artifacts, sync task checklists to Feishu subtasks, transition workflow nodes, and archive on completion. Every write goes through a two-phase plan → confirm → apply protocol, and Feishu access uses your own `meegle` credentials (keychain-managed) — native Feishu permissions are the authorization boundary.
 
-The setup wizard also installs `skills/meegle-sdlc/`, an SDLC orchestration extension on top of the meegle skill. When a task branch name contains a Meegle work item ID (e.g. `feature/2025091234-user-login`), the agent binds the session to that requirement; once development / testing / product work is delivered (merged, confirmed, or finalized), it proposes a user-confirmed workflow-node transition so Feishu Project status stays in sync with real progress.
-
-The repository also ships `sdlc-pipeline`, a command-driven AI SDLC skill. It exposes `/sdlc-start`, `/sdlc-next`, `/sdlc-done`, and `/sdlc-status` to drive a Feishu Project (Meegle) requirement end-to-end: check out the requirement's code branch, upload design docs / test cases / test results to `docs/sdlc/<ID>/` in git, break the requirement into estimated tasks, and transition the workflow nodes — with explicit user confirmation before every push and every node transition. It builds on the `meegle` skill for execution and shares `meegle-sdlc`'s confirmation/read-back discipline.
-
-### What it covers
-
-- **Command reference** — every `meegle` resource / method with required parameters and examples
-- **MQL search** — syntax for `workitem query`, operators, scope keywords
-- **Field values** — how to shape complex field payloads (arrays, nested JSON, date ranges)
-- **Rich text** — Markdown subset supported by Meegle's rich-text editor
-- **SOPs** — step-by-step playbooks for creating work items, transitioning nodes, transitioning states, and updating fields
-- **Auth guard** — the skill refuses to run business commands until `meegle auth status` succeeds
+The wizard also writes the shared collaboration manual to `~/.sdlc/skill-core.md` — the single source of rules the thin entries point at — and refreshes it on every install/upgrade so it always matches the installed CLI version.
 
 ### Usage
 
-Once the setup wizard has run, ask the agent in natural language. For example:
+Once the setup wizard has run, use the slash commands or plain natural language ("接需求 <链接>", "保存一下", "提测", "现在什么情况"):
 
 ```
-Show me this week's P0 stories in the PROJ space.
+/sdlc-start https://project.feishu.cn/<space>/story/detail/<ID>
 ```
 
-The agent consults the skill, picks the right `meegle` commands, and runs them for you. Pair with `--dry-run` (see [Security](#security--risk-warnings)) to preview side-effectful operations before the agent commits them.
+The agent narrates each plan in plain language, executes only after you confirm, and reports read-back-verified results — never "the API said success". High-frequency low-risk actions (save / handoff / task sync) run directly and stop honestly on failure.
+
+End-user guide: [docs/usage-sdlc.md](docs/usage-sdlc.md) · Architecture & command reference: [sdlc/README.md](sdlc/README.md). The `meegle` CLI itself remains fully usable standalone (`meegle --help`).
 
 ## Commands
 

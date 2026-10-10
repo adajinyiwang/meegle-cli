@@ -397,8 +397,14 @@ function updateAgentSkillBestEffort({ output = process.stderr, locale = "en", in
   output.write(msg.skillUpdating);
   let updated = false;
   try {
-    const install = installerFn || require("./install-wizard.js").installAgentSkill;
-    updated = install({ bestEffort: true }) !== false;
+    if (installerFn) {
+      updated = installerFn({ bestEffort: true }) !== false;
+    } else {
+      const wizard = require("./install-wizard.js");
+      updated = wizard.installAgentSkill({ bestEffort: true }) !== false;
+      // Keep ~/.sdlc/skill-core.md in lockstep with the upgraded sdlc CLI.
+      if (updated) wizard.installSkillCore({ bestEffort: true });
+    }
   } catch (_) {
     updated = false;
   }

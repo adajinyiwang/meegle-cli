@@ -1,0 +1,10 @@
+{
+  "name": "sdlc-cli",
+  "version": "0.2.2",
+  "private": true,
+  "type": "module",
+  "description": "dida-sdlc 客户端 CLI（ESM 直发，无构建链；分发见 install.sh）",
+  "bin": { "sdlc": "cli/bin/sdlc.js" },
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test" }
+}

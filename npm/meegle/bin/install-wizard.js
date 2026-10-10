@@ -165,7 +165,29 @@ function installAgentSkill({ bestEffort = false, runFn = run } = {}) {
   try {
     // Explicit skill list: new skills must be added here deliberately, so we
     // never push an unreviewed skill to all users via `--skill '*'`.
-    runFn("npm", ["exec", "--yes", "--package=skills", "--", "skills", "add", SKILLS_REPO, "-y", "-g", "-s", "meegle", "meegle-sdlc", "sdlc-pipeline"], { timeout: 120000 });
+    runFn("npm", ["exec", "--yes", "--package=skills", "--", "skills", "add", SKILLS_REPO, "-y", "-g", "-s", "sdlc-init", "sdlc-start", "sdlc-next", "sdlc-done", "sdlc-status", "sdlc-update"], { timeout: 120000 });
+    return true;
+  } catch (err) {
+    if (!bestEffort) throw err;
+    return false;
+  }
+}
+
+// The sdlc-* thin entries all read their shared rules from ~/.sdlc/skill-core.md.
+// The npm package ships the file at sdlc/skill-core.md; when running from the
+// repo (tests, local dev) fall back to the repo-root sdlc/ directory. Rewritten
+// on every install/upgrade so skill-core always matches the installed sdlc CLI.
+function installSkillCore({ bestEffort = false, homeDir = os.homedir() } = {}) {
+  try {
+    const candidates = [
+      path.join(__dirname, "..", "sdlc", "skill-core.md"),
+      path.join(__dirname, "..", "..", "..", "sdlc", "skill-core.md"),
+    ];
+    const source = candidates.find((p) => fs.existsSync(p));
+    if (!source) throw new Error("skill-core.md not found in package or repo layout");
+    const destDir = path.join(homeDir, ".sdlc");
+    fs.mkdirSync(destDir, { recursive: true });
+    fs.copyFileSync(source, path.join(destDir, "skill-core.md"));
     return true;
   } catch (err) {
     if (!bestEffort) throw err;
@@ -291,6 +313,7 @@ async function stepInstallSkills(msg) {
   // prior installs — name-substring detection mis-fired on sibling skills like
   // `meegle-plugin` and silently skipped the core skill.
   installAgentSkill();
+  installSkillCore();
   console.log(msg.skillsDone);
 }
 
@@ -391,4 +414,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { installAgentSkill, main };
+module.exports = { installAgentSkill, installSkillCore, main };

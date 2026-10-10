@@ -8,18 +8,31 @@ versioned section on each npm release.
 
 ## [Unreleased]
 
+## [v1.0.25] - 2026-10-10
+
 ### Added
 
-- New `meegle-sdlc` agent skill, installed alongside the `meegle` skill by the setup wizard and the best-effort updater. It binds a session to the Meegle work item parsed from the git branch name and, after development/testing/product work is delivered (merged or confirmed), proposes a user-confirmed workflow-node transition, delegating execution to the `meegle` skill.
-- Added the `sdlc-pipeline` Agent Skill: a command-driven AI SDLC pipeline (`/sdlc-start`, `/sdlc-next`, `/sdlc-done`, `/sdlc-status`) that drives a Feishu Project (Meegle) requirement through branch checkout, document upload to git (`docs/sdlc/<ID>/`), task breakdown with estimates, and workflow node transitions. It delegates execution to the `meegle` skill and reuses `meegle-sdlc`'s transition discipline. `meegle install` now installs all three skills (`-s meegle meegle-sdlc sdlc-pipeline`).
+- Bundled the dida-sdlc AI SDLC client (v0.2.2) under `sdlc/`: the `sdlc` Node CLI (plan/apply two-phase writes, gitops, journal, Feishu integration through the `meegle` CLI) now installs as a second global command, and six thin agent entries (`sdlc-init`, `sdlc-start`, `sdlc-next`, `sdlc-done`, `sdlc-status`, `sdlc-update`) drive a requirement end-to-end. The shared collaboration manual ships as `sdlc/skill-core.md` and is installed to `~/.sdlc/skill-core.md` by the setup wizard and the best-effort updater.
+
+### Changed
+
+- `meegle install` now installs the six `sdlc-*` skills (was `meegle`, `meegle-sdlc`, `sdlc-pipeline`) and rewrites `~/.sdlc/skill-core.md` on every install/upgrade so the shared rules always match the installed CLI version.
+- dida-sdlc distribution switched from its `install.sh` / git-tag model to this npm package: update = `npm i -g @didatravel-jinyi/meegle@latest`. The git-based `sdlc update` self-update is retired (it refuses with a reinstall hint under npm distribution).
+
+### Removed
+
+- The `meegle`, `meegle-sdlc`, and `sdlc-pipeline` agent skills and `docs/usage-sdlc-pipeline.md`, superseded by the dida-sdlc suite (see `docs/usage-sdlc.md`). The `meegle` CLI itself is unchanged.
+
+## [v1.0.24] - 2026-10-08
+
+### Added
+
+- New `meegle-sdlc` agent skill, installed alongside the `meegle` skill by the setup wizard and the best-effort updater. It binds a session to the Meegle work item parsed from the git branch name and, after development/testing/product work is delivered (merged or confirmed), proposes a user-confirmed workflow-node transition, delegating execution to the `meegle` skill. (Superseded in v1.0.25.)
+- Added the `sdlc-pipeline` Agent Skill: a command-driven AI SDLC pipeline (`/sdlc-start`, `/sdlc-next`, `/sdlc-done`, `/sdlc-status`) that drives a Feishu Project (Meegle) requirement through branch checkout, document upload to git (`docs/sdlc/<ID>/`), task breakdown with estimates, and workflow node transitions. It delegates execution to the `meegle` skill and reuses `meegle-sdlc`'s transition discipline. `meegle install` now installs all three skills (`-s meegle meegle-sdlc sdlc-pipeline`). (Superseded in v1.0.25.)
 
 ### Changed
 
 - Renamed the distribution channel: the npm package is now `@didatravel-jinyi/meegle` (was `@lark-project/meegle`) and Agent Skills are installed from the `adajinyiwang/meegle-cli` GitHub repository. The quick-start command is now `npx @didatravel-jinyi/meegle@latest install`. The CLI command name (`meegle`) and Go module path are unchanged.
-
-## [v1.0.24] - 2026-10-08
-
-### Changed
 
 - Updated the Meegle Agent Skill with confirmed `free_add` option creation for select and multi-select fields, exact-name matching before writes, and unique option ID requirements.
 - Split MQL guidance into focused references and clarified query, pagination, and CLI examples in the Meegle Agent Skill.

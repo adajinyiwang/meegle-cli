@@ -117,30 +117,21 @@ meegle auth status
 
 ## AI Agent Skill
 
-安装向导会安装 `skills/meegle/`，这是一份可直接加载到 Trae、Claude Code、Cursor、Windsurf、Gemini CLI、GitHub Copilot CLI 等 Agent 的 skill。它会教 Agent 通过本 CLI 操作 Meegle，而不是从自然语言说明里猜命令形状。
+安装向导会安装 **dida-sdlc** skill 套件（`skills/sdlc-*/`）：6 个薄入口——`/sdlc-init`、`/sdlc-start`、`/sdlc-next`、`/sdlc-done`、`/sdlc-status`、`/sdlc-update`——适用于 Claude Code 等支持 Agent Skills 的助手，由本包内置的 `sdlc` CLI 承载执行（与 `meegle` 一起装为全局命令）。它们把一条飞书项目（Meegle）需求从接手驱动到收尾：绑定需求分支、保存/交接产物、把任务清单同步为飞书子任务、流转工作流节点、归档收尾。所有写动作走 plan → 确认 → apply 两段式协议；飞书访问用你本人的 `meegle` 凭据（keychain 托管）——飞书原生权限即授权边界。
 
-安装向导还会安装 `skills/meegle-sdlc/` —— 基于 meegle skill 的 SDLC 编排扩展。当任务分支名包含工作项 ID（如 `feature/2025091234-user-login`）时，Agent 会自动绑定该飞书项目需求；开发 / 测试 / 产品工作交付（代码合入、测试确认、文档定稿）后，Agent 会在征得你确认的前提下流转对应节点，让飞书项目里的需求状态与实际进度保持同步。
-
-仓库同时提供 `sdlc-pipeline`——命令式 AI SDLC 流水线 skill。通过 `/sdlc-start`、`/sdlc-next`、`/sdlc-done`、`/sdlc-status` 驱动飞书项目（Meegle）需求全链路：拉取需求代码分支、将设计文档/测试用例/测试结果上传到 git 的 `docs/sdlc/<需求ID>/`、拆分任务并估分排期、流转工作流节点——每次 push 与节点流转前都需用户明确确认。执行委派 `meegle` skill，确认/回读纪律与 `meegle-sdlc` 单源共享。
-
-### 覆盖内容
-
-- **命令参考** — 每个 `meegle` resource / method 的必填参数与示例
-- **MQL 搜索** — `workitem query` 的语法、运算符、作用域关键字
-- **字段值** — 复杂字段载荷（数组、嵌套 JSON、日期区间）的写法
-- **富文本** — Meegle 富文本编辑器支持的 Markdown 子集
-- **SOP** — 创建工作项、节点流转、状态流转、更新字段等场景的分步剧本
-- **授权守护** — 所有业务命令前强制先过 `meegle auth status`
+向导还会把共享协作手册写入 `~/.sdlc/skill-core.md`（薄入口指向的唯一规则源），每次安装/升级自动刷新，与所装 CLI 版本严格一致。
 
 ### 使用方式
 
-安装向导执行完成后，直接用自然语言和 Agent 对话。例如：
+安装向导执行完成后，直接用斜杠命令或自然语言和 Agent 对话（「接需求 <链接>」「保存一下」「提测」「现在什么情况」）：
 
 ```
-帮我看一下 PROJ 空间本周待办里的 P0 需求
+/sdlc-start https://project.feishu.cn/<space>/story/detail/<ID>
 ```
 
-Agent 会参考 skill，自动选择合适的 `meegle` 命令执行。配合 `--dry-run`（见 [安全](#安全与风险提示)）可以在 Agent 真正执行副作用前先预览请求。
+Agent 用自然语言转述计划，你确认后才执行，结果以回读核实为准——不拿「接口返回 success」当数。高频低风险动作（保存/交接/任务同步）直通执行，失败即停如实转述。
+
+终端用户指南：[docs/usage-sdlc.md](docs/usage-sdlc.md) ｜ 架构与命令参考：[sdlc/README.md](sdlc/README.md)。`meegle` CLI 本身仍可独立使用（`meegle --help`）。
 
 ## 命令一览
 

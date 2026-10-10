@@ -1,0 +1,161 @@
+# dida-sdlc 仓库级流程配置（方案 v1.0；仅设计模板，非运行环境配置）
+# 放置于仓库 .sdlc/config.yaml；init 由维护者创建，start 缺配置只提示接入。
+# 仓库只维护这一份配置，不给每个需求锁配置，也不建设迁移/重配置平台。
+# config_revision 是 CLI 读取时生成的规范化内容摘要，记录在 plan/execution/事件，不手填于此。
+# DoD 全部是集中展示的软提示；用户可在现有 plan 确认中接受缺口继续，不是质量门禁。
+# owner_role 用于阶段视角和参与人建议；真实权限由飞书原生权限实时核验（D59）。
+# CLI 传来的配置、meta 参与人缓存和本地角色声明都不是权限依据（D37-D39）。
+# v5（D59）：schema 5——meegle-cli 通道；stage_nodes 每阶段一条 node_key 主映射
+#（1:N nodes 序列退役，推进语义 = 节点流转 + 入口任务勾选）；terminal 终态节点。
+schema_version: 5
+
+git:
+  trunk: master                     # 唯一需求 PR 的目标分支，按仓库实际主干维护
+
+# dod 对象仅含 id/text/check?/path?；未填 check = 人工内容建议。
+# check 可选值仅 file_exists/tasks_parseable/git_synced/pr_exists/pr_merged/report_current。
+# 检查结果区分已核实/缺口/未知；file_exists 不代表内容完整，manual 不可覆盖已知反证。
+# 全部 DoD 缺口都可集中接受，但不能伪造已测试/已提交/已合并；参数、权限、状态冲突仍是技术边界。
+stages:
+  - id: prd
+    name: 产品设计
+    owner_role: product
+    artifacts: [product/prd.md]
+    dod:
+      - id: prd_file
+        text: PRD 已起草，非目标与待确认项已说明
+        check: file_exists
+        path: product/prd.md
+      - id: prd_ac
+        text: AC 可验证，需求边界已与接手人对齐
+      - id: dev_brief
+        text: 开发交接简报已由 LLM 按用户意图起草
+        check: file_exists
+        path: dev/brief.md
+    next: dev
+
+  - id: dev
+    name: 开发实现
+    owner_role: dev
+    artifacts: [dev/tasks.md]
+    dod:
+      - id: tasks_parseable
+        text: 粗任务块可解析；缺失或无任务只提示，不能据此猜测远端任务
+        check: tasks_parseable
+        path: dev/tasks.md
+      - id: git_synced
+        text: 本需求产物已提交推送，分支同步状态已核实
+        check: git_synced
+      - id: pr_exists
+        text: 开发完成提测时已创建或复用本需求唯一 PR（日常 save 不建 PR）
+        check: pr_exists
+      - id: tasks_reviewed
+        text: 粗任务完成、未完及取消情况已说明；取消不等于完成
+      - id: review_context
+        text: review 情况与未验证项已向接手人说明
+      - id: test_brief
+        text: 测试交接简报已起草，包含本轮版本与缺口
+        check: file_exists
+        path: test/brief.md
+    next: test
+
+  - id: test
+    name: 测试验收
+    owner_role: test
+    artifacts: [test/testcases.md, test/report.md]
+    dod:
+      - id: testcases_file
+        text: 用例已起草（测试可左移，不要求等到 test 阶段）
+        check: file_exists
+        path: test/testcases.md
+      - id: report_current
+        text: 报告已关联本轮需求版本、实际受测代码和环境，未填或过期提示待复核
+        check: report_current
+        path: test/report.md
+      - id: report_result
+        text: 报告结论、未执行项与遗留影响已说明；有条件通过可列接受人与后续
+      - id: pr_merged
+        text: PR 已人工合并并经 done --manual-confirm pr_merged 确认（状态不可回读，人工路径）；未确认保持待核实，不能宣称完成交付
+        check: pr_merged
+    next: done                      # 只是收尾方向；仅 done 命令执行收尾，next 不隐式完结
+
+  - id: done
+    name: 完成
+    owner_role: product
+    artifacts: []
+    dod: []
+    next: null
+
+feishu:
+  # dida 项目预设（R2 调研实测定稿 + R5 PMO 配置预置）：project_key 无占位——
+  # 公司项目统一在 dida 下。日常 4 套流程模板全预置（PMO 导出 2026-10-09）：
+  #   story 敏捷 3312019 / story DiDa 2633577 / tech 敏捷 4584631 / tech 标准 2709195
+  # template_id = workitem template 字段 id（readState 并行 workitem get 零往返直读，
+  # profile 判定链 hint > 模板直查 > 节点集打分兜底）。实例节点 key = 模板节点 key
+  #（稳定）；dev 阶段用名称模式 `*开发` 的真实理由 = 33 个开发节点是并行 OR 分支
+  #（需求确认 → 命中其一），模式匹配实现「落位判定 = 任一开发节点 doing」，模板
+  # 加新开发节点自动适应。流程结构变更时（meegle 查不到对应节点）按本注释口径
+  # 自行更新 key。已接入仓的 config 不随 update 自动覆盖（自定义不静默覆盖）——
+  # 缺 template_id 时判定链回退节点集打分，行为兼容
+  project_key: dida
+  profiles:
+    story:                          # 产研需求·敏捷：需求关键信息确认 → 业务线开发 → 测试环境部署 → 测试 → 结束
+      template_id: "3312019"
+      work_item_type_key: story
+      # v5（D59）：每阶段一条 node_key 主映射（推进 = 连续流转到目标节点落位，
+      # 中间未推进节点自动补推；节点必填缺失停下转述由人补）。
+      # entry_tasks = 阶段入口流程自带任务（D48）：飞书创建需求时由流程模板自带；
+      # 进入该阶段后、需求子任务已创建时才勾选（tasks_split 动作内，交接时不勾、
+      # 需求阶段不动开发节点），幂等跳过已勾选。R5 全量口径（PMO 导出）：story
+      # 敏捷模板内混用两拼写——多数节点「确认进入开发」、state_28/state_29 为
+      #「确认进入研发」（7131581708 实测）；名单不全时入口强控会在未列节点失效。
+      stage_nodes:
+        prd:  { node_key: started, entry_tasks: [] }
+        dev:  { node_key: "*开发", entry_tasks: ["确认进入研发", "确认进入开发"] }
+        test: { node_key: state_45, entry_tasks: [] }
+      # terminal = 飞书终态节点（done --manual-confirm 后完成态 transition 的目标）；
+      # 终态判定以节点回读为准，人工确认只声明合并事实、不伪装 API 核实。
+      terminal:
+        node_key: state_50
+        mode: manual               # 完成态证据 = 飞书终态 + completion_recorded 事件
+    story-dida:                     # 产研需求·DiDa 标准：需求关键信息确认(doing) → 业务线开发 → Code Review → 部署测试环境 → 测试 → 安全验收 → 系统发布 → UAT → 结束
+      # R5 修正原 story2 观察（R4b 7131600756 节点集子集实测）：test 映射从部署
+      # 测试环境(state_40) 修正为真测试节点 state_8（PMO 全量导出）。入口任务全
+      # 模板统一「确认进入开发」（含 UI&UX设计 state_23——与开发并列的 UX 分支
+      # 入口，非 sdlc 映射节点）。安全验收 state_48 预置「安全测试/代码安全扫描」
+      # 为他人任务，代勾 owner 判定天然拦，无需预置。
+      template_id: "2633577"
+      work_item_type_key: story
+      stage_nodes:
+        prd:  { node_key: doing, entry_tasks: [] }      # DiDa 的确认节点 key 是 doing
+        dev:  { node_key: "*开发", entry_tasks: ["确认进入开发"] }
+        test: { node_key: state_8, entry_tasks: [] }
+      terminal:
+        node_key: end
+        mode: manual
+    tech:                           # 公共技术类需求·敏捷：需求关键信息确认 → 技术评审 → 团队开发 → Code Review → 测试环境部署 → 测试 → 结束
+      template_id: "4584631"
+      work_item_type_key: "67ce57bad6a376f27046df61"
+      # 入口任务 R5 全量口径（PMO 导出）：31 节点「确认进入开发」+ 例外 state_23
+      #「确定进入开发」、state_60「默认智能开发任务」。测试 state_54 预置「测试
+      # 任务（填写工时使用）」是排期载体（R4d ②补估分排期后须代勾）——不入名单。
+      stage_nodes:
+        # prd 含中间节点「技术评审」（state_56）：节点无映射 → 阶段 null → 一致性校验
+        # 拦 handoff（7131703974 实测卡点）——node_key 支持数组（同阶段多节点）
+        prd:  { node_key: [started, state_56], entry_tasks: [] }
+        dev:  { node_key: "*开发", entry_tasks: ["确认进入开发", "确定进入开发", "默认智能开发任务"] }
+        test: { node_key: state_54, entry_tasks: [] }   # 7130685632 实测：测试节点 state_54（state_3 是测试环境部署，中间节点追赶语义下无需映射）
+      terminal:
+        node_key: state_55
+        mode: manual
+    tech-std:                       # 公共技术类需求·标准交付：交付流程节点确认 → 技术评审 → 团队开发 → Code Review → 测试环境部署 → 测试 → 系统发布 → 结束
+      template_id: "2709195"
+      work_item_type_key: "67ce57bad6a376f27046df61"
+      stage_nodes:
+        prd:  { node_key: [started, state_0], entry_tasks: [] }   # 技术评审 state_0 同 tech 数组语义（人工卡评审时 current 不断档）
+        dev:  { node_key: "*开发", entry_tasks: ["确认进入开发"] }
+        test: { node_key: state_21, entry_tasks: [] }   # 注意：state_21 在 tech 敏捷模板是 API供应商开发——同 key 跨模板不同含义，模板判定就是为此
+      terminal:
+        node_key: state_3
+        mode: manual
+  subtask_type_key: task

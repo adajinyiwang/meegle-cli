@@ -1,6 +1,6 @@
 {
   "name": "@didatravel-jinyi/meegle",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "Agent-First CLI for Meegle (Lark Project)",
   "license": "MIT",
   "homepage": "https://github.com/adajinyiwang/meegle-cli#readme",
@@ -12,7 +12,8 @@
     "url": "https://github.com/adajinyiwang/meegle-cli/issues"
   },
   "bin": {
-    "meegle": "bin/meegle.js"
+    "meegle": "bin/meegle.js",
+    "sdlc": "sdlc/cli/bin/sdlc.js"
   },
   "engines": {
     "node": ">=16"
@@ -31,6 +32,7 @@
     "bin/install-wizard.js",
     "bin/update-notifier.js",
     "bin/meegle-*",
+    "sdlc/**",
     "README.md",
     "README.zh-CN.md",
     "CHANGELOG.md",
@@ -39,7 +41,7 @@
     "third_party_licenses/**"
   ],
   "scripts": {
-    "prepublishOnly": "cp ../../README.zh-CN.md ./README.zh-CN.md && cp ../../LICENSE ./LICENSE && cp ../../CHANGELOG.md ./CHANGELOG.md && cp ../../THIRD_PARTY_NOTICES.md ./THIRD_PARTY_NOTICES.md && rm -rf ./third_party_licenses && cp -R ../../third_party_licenses ./third_party_licenses && cp ../../README.md ./README.md",
+    "prepublishOnly": "cp ../../README.zh-CN.md ./README.zh-CN.md && cp ../../LICENSE ./LICENSE && cp ../../CHANGELOG.md ./CHANGELOG.md && cp ../../THIRD_PARTY_NOTICES.md ./THIRD_PARTY_NOTICES.md && rm -rf ./third_party_licenses && cp -R ../../third_party_licenses ./third_party_licenses && rm -rf ./sdlc && cp -R ../../sdlc ./sdlc && cp ../../README.md ./README.md",
     "test": "node --test test/*.test.js"
   },
   "keywords": [
