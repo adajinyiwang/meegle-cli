@@ -20,10 +20,10 @@
 
 ```bash
 # 一键安装（交互式向导：装 CLI + 装三个 skill）
-npx @didatravel/meegle@latest install
+npx @didatravel-jinyi/meegle@latest install
 
 # 私有化部署可指定 host；无浏览器环境可加 --device-code
-npx -y @didatravel/meegle@latest install --host <host> --device-code --lang zh
+npx -y @didatravel-jinyi/meegle@latest install --host <host> --device-code --lang zh
 ```
 
 向导会安装：
@@ -41,7 +41,7 @@ meegle auth login      # 浏览器或 --device-code
 meegle auth status     # 确认 logged_in
 ```
 
-**更新**：无需专门命令。运行 `npm i -g @didatravel/meegle@latest`，或跟随 CLI 启动时的更新提示即可；skill 随包同版本更新。
+**更新**：无需专门命令。运行 `npm i -g @didatravel-jinyi/meegle@latest`，或跟随 CLI 启动时的更新提示即可；skill 随包同版本更新。
 
 ## 3. 命令速览
 

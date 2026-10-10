@@ -15,7 +15,7 @@ versioned section on each npm release.
 
 ### Changed
 
-- Renamed the distribution channel: the npm package is now `@didatravel/meegle` (was `@lark-project/meegle`) and Agent Skills are installed from the `adajinyiwang/meegle-cli` GitHub repository. The quick-start command is now `npx @didatravel/meegle@latest install`. The CLI command name (`meegle`) and Go module path are unchanged.
+- Renamed the distribution channel: the npm package is now `@didatravel-jinyi/meegle` (was `@lark-project/meegle`) and Agent Skills are installed from the `adajinyiwang/meegle-cli` GitHub repository. The quick-start command is now `npx @didatravel-jinyi/meegle@latest install`. The CLI command name (`meegle`) and Go module path are unchanged.
 
 ## [v1.0.24] - 2026-10-08
 

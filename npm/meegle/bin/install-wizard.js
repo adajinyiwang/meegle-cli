@@ -5,7 +5,7 @@ const os = require("os");
 const path = require("path");
 const readline = require("readline");
 
-const PKG = "@didatravel/meegle";
+const PKG = "@didatravel-jinyi/meegle";
 const SKILLS_REPO = "adajinyiwang/meegle-cli";
 const DEFAULT_HOST = "meegle.com";
 const PRESET_HOSTS = [

@@ -25,7 +25,7 @@ description: |
 | `/sdlc-next` | 推进当前阶段的下一个未完成动作（一次一个） | [commands.md §next](references/commands.md) |
 | `/sdlc-done` | 收尾核对，如实报告完成/未完成 | [commands.md §done](references/commands.md) |
 | `/sdlc-status` | 实时状态展示（纯读，重查飞书 + git，无需确认） | [commands.md §status](references/commands.md) |
-| update（更新 skill） | 不由本 skill 处理：提示用户运行 `npm i -g @didatravel/meegle@latest` 或跟随 CLI 启动时的更新提示 | — |
+| update（更新 skill） | 不由本 skill 处理：提示用户运行 `npm i -g @didatravel-jinyi/meegle@latest` 或跟随 CLI 启动时的更新提示 | — |
 
 自然语言等价表达（「开启这个需求」「下一步」「需求什么状态了」）同样触发。团队约定（分支模板/仓库映射/节点映射）见 [team-conventions.md](references/team-conventions.md)。
 

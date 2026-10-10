@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D16-brightgreen.svg)](https://nodejs.org/)
-[![npm version](https://img.shields.io/npm/v/@didatravel/meegle.svg)](https://www.npmjs.com/package/@didatravel/meegle)
+[![npm version](https://img.shields.io/npm/v/@didatravel-jinyi/meegle.svg)](https://www.npmjs.com/package/@didatravel-jinyi/meegle)
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
@@ -51,7 +51,7 @@
 运行安装向导：
 
 ```bash
-npx @didatravel/meegle@latest install
+npx @didatravel-jinyi/meegle@latest install
 ```
 
 向导会全局安装或升级 CLI、安装 AI Agent Skill、配置 Meegle host，并启动登录。
@@ -72,7 +72,7 @@ npx @didatravel/meegle@latest install
   使用 ↑/↓ 选择，按 Enter 确认
 ```
 
-直接按 Enter 会先执行 `npm install -g @didatravel/meegle@latest` 更新 CLI，再通过 `meegle install` 使用的同一套安装方式 best-effort 更新 Meegle Agent Skill，最后继续原命令。当前环境缺少合适的 Skill 安装器、安装器不兼容或 Skill 下载失败时，只会提示已跳过，不会把成功的 CLI 更新改判为失败。选择**稍后提醒**后，24 小时内不再检查。这个轻量更新流程不会重新配置 host 或触发登录；需要完整的一站式设置时仍可运行 `meegle install`。
+直接按 Enter 会先执行 `npm install -g @didatravel-jinyi/meegle@latest` 更新 CLI，再通过 `meegle install` 使用的同一套安装方式 best-effort 更新 Meegle Agent Skill，最后继续原命令。当前环境缺少合适的 Skill 安装器、安装器不兼容或 Skill 下载失败时，只会提示已跳过，不会把成功的 CLI 更新改判为失败。选择**稍后提醒**后，24 小时内不再检查。这个轻量更新流程不会重新配置 host 或触发登录；需要完整的一站式设置时仍可运行 `meegle install`。
 
 非交互/CI 环境、stdout 被管道接走、执行 `install` 或 Shell 补全命令时会跳过检查，保证结构化命令输出不变。也可以设置 `MEEGLE_NO_UPDATE_CHECK=1` 显式关闭。
 
@@ -82,7 +82,7 @@ npx @didatravel/meegle@latest install
 
 ```bash
 # 1. 安装 CLI + Skill，配置 host，并登录
-npx @didatravel/meegle@latest install
+npx @didatravel-jinyi/meegle@latest install
 
 # 2. 查看本周待办
 meegle mywork todo --action this_week --page-num 1
@@ -100,7 +100,7 @@ meegle inspect workitem.create
 默认浏览器 OAuth 流程依赖真实 TTY。在 CI Runner、管道、Claude Code 这类环境里，使用同一个安装向导，但显式传入 host 并启用 Device Code 登录：
 
 ```bash
-npx -y @didatravel/meegle@latest install --host <host> --device-code --lang zh
+npx -y @didatravel-jinyi/meegle@latest install --host <host> --device-code --lang zh
 ```
 
 `<host>` 示例：`project.feishu.cn`、`meegle.com`，或自建租户域名（如 `your-tenant.example.com`）。

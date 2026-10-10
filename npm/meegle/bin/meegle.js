@@ -34,7 +34,7 @@ async function main(args = process.argv.slice(2)) {
         ? `meegle binary is missing or not executable.\n` +
           `Detected platform: ${detected}\n` +
           `Expected binary at: ${binPath}\n` +
-          `Try reinstalling: npm i -g @didatravel/meegle\n` +
+          `Try reinstalling: npm i -g @didatravel-jinyi/meegle\n` +
           `If the problem persists, please file an issue with the output of: node -v && npm -v`
         : `Unsupported platform: ${detected}\n` +
           `Supported platforms: ${SUPPORTED.join(", ")}`

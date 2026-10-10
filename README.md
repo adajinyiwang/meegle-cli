@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D16-brightgreen.svg)](https://nodejs.org/)
-[![npm version](https://img.shields.io/npm/v/@didatravel/meegle.svg)](https://www.npmjs.com/package/@didatravel/meegle)
+[![npm version](https://img.shields.io/npm/v/@didatravel-jinyi/meegle.svg)](https://www.npmjs.com/package/@didatravel-jinyi/meegle)
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
@@ -51,7 +51,7 @@ Command-line tool for [Meegle](https://meegle.com?utm_source=github&utm_medium=r
 Run the setup wizard:
 
 ```bash
-npx @didatravel/meegle@latest install
+npx @didatravel-jinyi/meegle@latest install
 ```
 
 The wizard installs or upgrades the CLI globally, installs the AI Agent Skill, configures the Meegle host, and starts login.
@@ -72,7 +72,7 @@ What's new:
   Use ↑/↓ to select, then press Enter
 ```
 
-Pressing Enter first upgrades the CLI with `npm install -g @didatravel/meegle@latest`, then makes a best-effort attempt to upgrade the Meegle Agent Skill through the same installer used by `meegle install`, and finally continues the original command. A missing or incompatible Skill installer, or a Skill download failure, never changes a successful CLI upgrade into a failure. Choosing **Remind me later** defers the next check for 24 hours. This lightweight update does not reconfigure the host or trigger login; use `meegle install` when you want the full setup wizard.
+Pressing Enter first upgrades the CLI with `npm install -g @didatravel-jinyi/meegle@latest`, then makes a best-effort attempt to upgrade the Meegle Agent Skill through the same installer used by `meegle install`, and finally continues the original command. A missing or incompatible Skill installer, or a Skill download failure, never changes a successful CLI upgrade into a failure. Choosing **Remind me later** defers the next check for 24 hours. This lightweight update does not reconfigure the host or trigger login; use `meegle install` when you want the full setup wizard.
 
 The check is skipped for non-interactive/CI execution, piped stdout, `install`, and shell-completion commands, so structured command output remains unchanged. Set `MEEGLE_NO_UPDATE_CHECK=1` to disable it explicitly.
 
@@ -82,7 +82,7 @@ The check is skipped for non-interactive/CI execution, piped stdout, `install`, 
 
 ```bash
 # 1. Install CLI + Skill, configure host, and log in
-npx @didatravel/meegle@latest install
+npx @didatravel-jinyi/meegle@latest install
 
 # 2. View this week's to-dos
 meegle mywork todo --action this_week --page-num 1
@@ -100,7 +100,7 @@ meegle inspect workitem.create
 The default browser OAuth flow requires a real TTY. In CI runners, pipes, and agent shells like Claude Code, run the same setup wizard with an explicit host and Device Code login:
 
 ```bash
-npx -y @didatravel/meegle@latest install --host <host> --device-code --lang en
+npx -y @didatravel-jinyi/meegle@latest install --host <host> --device-code --lang en
 ```
 
 Examples of `<host>`: `project.feishu.cn`, `meegle.com`, or your self-hosted tenant domain such as `your-tenant.example.com`. The Device Code flow prints an authorization URL; send it to the user and keep the command running until authorization completes.

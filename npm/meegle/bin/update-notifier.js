@@ -6,7 +6,7 @@ const os = require("os");
 const path = require("path");
 const readline = require("readline");
 
-const PKG = "@didatravel/meegle";
+const PKG = "@didatravel-jinyi/meegle";
 const CHANGELOG_URL = "https://github.com/adajinyiwang/meegle-cli/blob/main/CHANGELOG.md#changed";
 const CHANGELOG_RAW_URL = "https://raw.githubusercontent.com/adajinyiwang/meegle-cli/main/CHANGELOG.md";
 const CACHE_SCHEMA_VERSION = 1;
@@ -28,13 +28,13 @@ const messages = {
     updateNow: "Update now (recommended)",
     later: "Remind me later",
     hint: "Use ↑/↓ to select, then press Enter",
-    updating: "Updating @didatravel/meegle to v%s...\n",
+    updating: "Updating @didatravel-jinyi/meegle to v%s...\n",
     updated: "✓ Meegle CLI updated to v%s.\n",
     skillUpdating: "Updating the Meegle Agent Skill (best effort)...\n",
     skillUpdated: "✓ Meegle Agent Skill updated.\n",
     skillSkipped: "! Meegle Agent Skill update was unavailable; the CLI update is still complete.\n",
     continuing: "Continuing with your command...\n\n",
-    updateFailed: "Could not update automatically. Continue with the current version and retry later:\n  npm install -g @didatravel/meegle@latest\n\n",
+    updateFailed: "Could not update automatically. Continue with the current version and retry later:\n  npm install -g @didatravel-jinyi/meegle@latest\n\n",
   },
   zh: {
     title: "Meegle CLI 有新版本",
@@ -47,13 +47,13 @@ const messages = {
     updateNow: "立即更新（推荐）",
     later: "稍后提醒",
     hint: "使用 ↑/↓ 选择，按 Enter 确认",
-    updating: "正在将 @didatravel/meegle 更新到 v%s...\n",
+    updating: "正在将 @didatravel-jinyi/meegle 更新到 v%s...\n",
     updated: "✓ Meegle CLI 已更新到 v%s。\n",
     skillUpdating: "正在尝试更新 Meegle Agent Skill（失败不影响 CLI 更新）...\n",
     skillUpdated: "✓ Meegle Agent Skill 已更新。\n",
     skillSkipped: "! 当前环境无法更新 Meegle Agent Skill；CLI 已成功更新。\n",
     continuing: "将继续执行当前命令。\n\n",
-    updateFailed: "自动更新失败，将继续使用当前版本。你可以稍后手动执行：\n  npm install -g @didatravel/meegle@latest\n\n",
+    updateFailed: "自动更新失败，将继续使用当前版本。你可以稍后手动执行：\n  npm install -g @didatravel-jinyi/meegle@latest\n\n",
   },
 };
 
