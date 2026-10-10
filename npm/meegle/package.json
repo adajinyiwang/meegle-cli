@@ -1,15 +1,15 @@
 {
-  "name": "@lark-project/meegle",
+  "name": "@didatravel/meegle",
   "version": "1.0.24",
   "description": "Agent-First CLI for Meegle (Lark Project)",
   "license": "MIT",
-  "homepage": "https://github.com/larksuite/meegle-cli#readme",
+  "homepage": "https://github.com/adajinyiwang/meegle-cli#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/larksuite/meegle-cli.git"
+    "url": "git+https://github.com/adajinyiwang/meegle-cli.git"
   },
   "bugs": {
-    "url": "https://github.com/larksuite/meegle-cli/issues"
+    "url": "https://github.com/adajinyiwang/meegle-cli/issues"
   },
   "bin": {
     "meegle": "bin/meegle.js"

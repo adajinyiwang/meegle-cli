@@ -5,8 +5,8 @@ const os = require("os");
 const path = require("path");
 const readline = require("readline");
 
-const PKG = "@lark-project/meegle";
-const SKILLS_REPO = "larksuite/meegle-cli";
+const PKG = "@didatravel/meegle";
+const SKILLS_REPO = "adajinyiwang/meegle-cli";
 const DEFAULT_HOST = "meegle.com";
 const PRESET_HOSTS = [
   { label: "Feishu Project (project.feishu.cn)", value: "project.feishu.cn" },
@@ -163,7 +163,9 @@ function runCapture(cmd, args, opts = {}) {
 // changes a successful CLI upgrade into a failure.
 function installAgentSkill({ bestEffort = false, runFn = run } = {}) {
   try {
-    runFn("npm", ["exec", "--yes", "--package=skills", "--", "skills", "add", SKILLS_REPO, "-y", "-g"], { timeout: 120000 });
+    // Explicit skill list: new skills must be added here deliberately, so we
+    // never push an unreviewed skill to all users via `--skill '*'`.
+    runFn("npm", ["exec", "--yes", "--package=skills", "--", "skills", "add", SKILLS_REPO, "-y", "-g", "-s", "meegle", "meegle-sdlc", "sdlc-pipeline"], { timeout: 120000 });
     return true;
   } catch (err) {
     if (!bestEffort) throw err;
@@ -215,7 +217,7 @@ function semverLessThan(a, b) {
 function getGloballyInstalledVersion() {
   try {
     const out = runSilent("npm", ["list", "-g", PKG, "--depth=0"], { timeout: 15000 });
-    const match = out.match(/@lark-project\/meegle@([^\s]+)/);
+    const match = out.match(new RegExp(PKG.replace(/\//g, "\\/") + "@([^\\s]+)"));
     return match ? match[1] : "unknown";
   } catch (_) {
     return null;

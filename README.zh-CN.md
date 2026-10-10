@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D16-brightgreen.svg)](https://nodejs.org/)
-[![npm version](https://img.shields.io/npm/v/@lark-project/meegle.svg)](https://www.npmjs.com/package/@lark-project/meegle)
+[![npm version](https://img.shields.io/npm/v/@didatravel/meegle.svg)](https://www.npmjs.com/package/@didatravel/meegle)
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
@@ -51,14 +51,14 @@
 运行安装向导：
 
 ```bash
-npx @lark-project/meegle@latest install
+npx @didatravel/meegle@latest install
 ```
 
 向导会全局安装或升级 CLI、安装 AI Agent Skill、配置 Meegle host，并启动登录。
 
 ### 自动更新提示
 
-通过 npm 分发的 CLI 在交互式终端启动时，最多每 24 小时检查一次 npm 最新版本。发现新版本后，会从 [CHANGELOG](https://github.com/larksuite/meegle-cli/blob/main/CHANGELOG.md#changed) 提取当前版本到最新版本之间已经发布的 `Added` 和 `Changed` 条目，并展示交互式功能上新提示：
+通过 npm 分发的 CLI 在交互式终端启动时，最多每 24 小时检查一次 npm 最新版本。发现新版本后，会从 [CHANGELOG](https://github.com/adajinyiwang/meegle-cli/blob/main/CHANGELOG.md#changed) 提取当前版本到最新版本之间已经发布的 `Added` 和 `Changed` 条目，并展示交互式功能上新提示：
 
 ```text
 ✨ Meegle CLI 有新版本: v<当前版本> → v<最新版本>
@@ -72,7 +72,7 @@ npx @lark-project/meegle@latest install
   使用 ↑/↓ 选择，按 Enter 确认
 ```
 
-直接按 Enter 会先执行 `npm install -g @lark-project/meegle@latest` 更新 CLI，再通过 `meegle install` 使用的同一套安装方式 best-effort 更新 Meegle Agent Skill，最后继续原命令。当前环境缺少合适的 Skill 安装器、安装器不兼容或 Skill 下载失败时，只会提示已跳过，不会把成功的 CLI 更新改判为失败。选择**稍后提醒**后，24 小时内不再检查。这个轻量更新流程不会重新配置 host 或触发登录；需要完整的一站式设置时仍可运行 `meegle install`。
+直接按 Enter 会先执行 `npm install -g @didatravel/meegle@latest` 更新 CLI，再通过 `meegle install` 使用的同一套安装方式 best-effort 更新 Meegle Agent Skill，最后继续原命令。当前环境缺少合适的 Skill 安装器、安装器不兼容或 Skill 下载失败时，只会提示已跳过，不会把成功的 CLI 更新改判为失败。选择**稍后提醒**后，24 小时内不再检查。这个轻量更新流程不会重新配置 host 或触发登录；需要完整的一站式设置时仍可运行 `meegle install`。
 
 非交互/CI 环境、stdout 被管道接走、执行 `install` 或 Shell 补全命令时会跳过检查，保证结构化命令输出不变。也可以设置 `MEEGLE_NO_UPDATE_CHECK=1` 显式关闭。
 
@@ -82,7 +82,7 @@ npx @lark-project/meegle@latest install
 
 ```bash
 # 1. 安装 CLI + Skill，配置 host，并登录
-npx @lark-project/meegle@latest install
+npx @didatravel/meegle@latest install
 
 # 2. 查看本周待办
 meegle mywork todo --action this_week --page-num 1
@@ -100,7 +100,7 @@ meegle inspect workitem.create
 默认浏览器 OAuth 流程依赖真实 TTY。在 CI Runner、管道、Claude Code 这类环境里，使用同一个安装向导，但显式传入 host 并启用 Device Code 登录：
 
 ```bash
-npx -y @lark-project/meegle@latest install --host <host> --device-code --lang zh
+npx -y @didatravel/meegle@latest install --host <host> --device-code --lang zh
 ```
 
 `<host>` 示例：`project.feishu.cn`、`meegle.com`，或自建租户域名（如 `your-tenant.example.com`）。
@@ -118,6 +118,10 @@ meegle auth status
 ## AI Agent Skill
 
 安装向导会安装 `skills/meegle/`，这是一份可直接加载到 Trae、Claude Code、Cursor、Windsurf、Gemini CLI、GitHub Copilot CLI 等 Agent 的 skill。它会教 Agent 通过本 CLI 操作 Meegle，而不是从自然语言说明里猜命令形状。
+
+安装向导还会安装 `skills/meegle-sdlc/` —— 基于 meegle skill 的 SDLC 编排扩展。当任务分支名包含工作项 ID（如 `feature/2025091234-user-login`）时，Agent 会自动绑定该飞书项目需求；开发 / 测试 / 产品工作交付（代码合入、测试确认、文档定稿）后，Agent 会在征得你确认的前提下流转对应节点，让飞书项目里的需求状态与实际进度保持同步。
+
+仓库同时提供 `sdlc-pipeline`——命令式 AI SDLC 流水线 skill。通过 `/sdlc-start`、`/sdlc-next`、`/sdlc-done`、`/sdlc-status` 驱动飞书项目（Meegle）需求全链路：拉取需求代码分支、将设计文档/测试用例/测试结果上传到 git 的 `docs/sdlc/<需求ID>/`、拆分任务并估分排期、流转工作流节点——每次 push 与节点流转前都需用户明确确认。执行委派 `meegle` skill，确认/回读纪律与 `meegle-sdlc` 单源共享。
 
 ### 覆盖内容
 
@@ -1024,11 +1028,11 @@ meegle auth login
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=larksuite/meegle-cli&type=Date)](https://star-history.com/#larksuite/meegle-cli&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=adajinyiwang/meegle-cli&type=Date)](https://star-history.com/#adajinyiwang/meegle-cli&Date)
 
 ## 贡献
 
-欢迎社区贡献。Bug 反馈或功能建议请提 [Issue](https://github.com/larksuite/meegle-cli/issues) 或 [Pull Request](https://github.com/larksuite/meegle-cli/pulls)。对于较大改动，建议先通过 Issue 讨论。
+欢迎社区贡献。Bug 反馈或功能建议请提 [Issue](https://github.com/adajinyiwang/meegle-cli/issues) 或 [Pull Request](https://github.com/adajinyiwang/meegle-cli/pulls)。对于较大改动，建议先通过 Issue 讨论。
 
 ## License
 

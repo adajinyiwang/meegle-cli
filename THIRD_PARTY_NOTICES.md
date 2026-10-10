@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-This product — the `meegle` CLI distributed via the `@lark-project/meegle`
+This product — the `meegle` CLI distributed via the `@didatravel/meegle`
 npm package and the standalone Go binaries under `dist/` — includes third-party
 open-source software. Each component is listed below with its project URL,
 license type, copyright holder, and the path to the full license text shipped
