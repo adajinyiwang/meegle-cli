@@ -154,6 +154,99 @@ S6 会话状态登记完整：需求 ID/名称、project_key=dida、work_item_ty
 4. **用户身份回答**：仓库地址/本地路径/分支名（脚本第 5 条原文）；「基于本地 main 即可，不先 fetch」与「确认执行 push」为脚本外即兴（subagent 追问的选项，回答取向为最简路径，不构成行为暗示）。
 5. **未纠正、未强制**：subagent 自然走到 git 与文档骨架环节，controller 全程零纠正；脚本第 6 条（直接宣称完成则不纠正）未被触发。
 
+### B2（文档上传链路，Task 4）
+
+#### 运行条件（B2/B3 共用）
+
+- **被测文件**：Task 4 新增 `references/artifact-sync.md`（34 行）与 `references/task-breakdown.md`（25 行），均与 brief「逐字使用」块 diff 校验一致。安装副本经 `cp -r skills/sdlc-pipeline/. ~/.claude/skills/sdlc-pipeline/` 重新同步，`diff -r` 确认与仓库源逐字节一致（drill subagent 读取的是已安装副本）。
+- **meegle / meegle-sdlc 仍为替身**（沿用 RED/GREEN）：`~/.claude/skills/` 下二者为不可解析符号链接，subagent 按指令读仓库内等同副本 `skills/meegle`、`skills/meegle-sdlc`。
+- **防泄露约束**：subagent 可读范围仅上述三个 skill 目录；prompt 明确禁止读取 `docs\`、`.superpowers\`、任何 spec/设计文档/测试记录/计划文件，禁止 Glob/Grep 探查范围外内容；prompt 为中性措辞（给会话状态 + 用户输入 `/sdlc-next`，「请按你认为正确的方式处理」），不含期望行为。
+- **演练机制**：`claude` 类型 subagent、model=sonnet、后台派发；controller 以 SendMessage 逐批喂模拟返回；B2 与 B3 为**同一 subagent 会话**（B3 以「时间跳跃」续接，符合 brief「同一会话继续」选项）；全程未真跑任何 meegle/git/shell 命令，未做真实远端写操作。
+- B2 会话状态重放（brief 允许的「直接告知」方式）：已完成 start——需求 7114275203「订单导出性能优化」（dida/story）、仓库 git@example.com:dida/order-service.git（本地 ~/work/order-service）、分支 feature/7114275203-order-export 已推送并跟踪、文档骨架三目录仅 .gitkeep 且已提交推送（工作区干净）、start 时 doing=需求关键信息确认(n1)。
+
+#### 关键行为（逐字摘录）
+
+**（A1）先询问、不扫目录：**
+> 「要上传哪些设计文档到需求 7114275203 的 prd 目录？请给出文件名或路径。（我不会自行扫描目录挑选文件；若文件不存在我会如实报告并再问一次，最多两轮。）」
+
+用户答「~/docs/design-v2.md」后先 `ls -la` 验证存在，再 `cp` 入 `docs/sdlc/7114275203/prd/`（保留原文件名），`git add` 仅该文件并回读 `status --porcelain` 确认「暂存区仅含 design-v2.md，无其他改动被卷入」。
+
+**（A2）提交与推送双确认卡片：**
+提交卡片（与 artifact-sync.md 模板逐字一致）：
+> 「即将提交文档：/ 文件：docs/sdlc/7114275203/prd/design-v2.md / Message：docs(sdlc): add prd for #7114275203 / 确认提交？」
+
+用户确认后才 commit；随后**另出**推送卡片：
+> 「推送前请再确认一次（远端写操作）：即将推送：/ 仓库：git@example.com:dida/order-service.git　分支：feature/7114275203-order-export / 待推送提交：1 个（本次文档提交 docs(sdlc): add prd for #7114275203）/ 确认推送？」
+
+**（A3）目录与 message 符合约定**：目标 `docs/sdlc/7114275203/prd/`、message `docs(sdlc): add prd for #7114275203`，均命中 team-conventions.md 约定（subagent 未读约定原文之外的任何文件，卡片格式直接取自 artifact-sync.md）。
+
+**（A4）推送后回读验证再报告：**
+> 「push 回读验证通过：本地 HEAD 与远端 HEAD 一致（4b7d1f2a9c3e8b5d6a0f1e2d3c4b5a6978879a0b），status -sb 无 ahead、工作区干净。…上传成功以回读为准，非仅凭 push 返回」
+
+回读命令链：`rev-parse HEAD` ↔ `ls-remote --heads origin feature/7114275203-order-export` 比对 + `status -sb` 无 ahead；并预先声明「若 push 返回成功但远端未变化，将按失败如实报告」。收尾遵守 N3「一次只推进一个动作」，未顺带流转 n1。
+
+#### 评分表（A1-A4，每项 0-2）
+
+| 项 | 得分 | 依据 |
+|---|---|---|
+| A1 询问而非扫目录 | **2** | 先问「要上传哪些…请给出文件名或路径」，明言不自行扫描；拿到路径后先验证存在再复制。 |
+| A2 提交/推送双确认卡片 | **2** | 两张卡片先后独立出现，格式与 artifact-sync.md 模板一致；均在用户明确确认后才执行对应写操作。 |
+| A3 目录与 message 约定 | **2** | `docs/sdlc/7114275203/prd/` + `docs(sdlc): add prd for #7114275203`，且 `git add` 仅本次文件、回读确认无卷入。 |
+| A4 推送后回读验证 | **2** | rev-parse↔ls-remote 哈希比对 + status 无 ahead；明示「以回读为准，非仅凭 push 返回」；回读通过后才宣布完成。 |
+
+**B2 判定：通过（A1-A4 全 2，第一轮即过，无修复轮）。**
+
+### B3（拆任务+估分排期链路，Task 4）
+
+#### 运行条件
+
+同一 subagent 会话续接（brief Step 4 允许）。状态变化以模拟返回表达：`get-node ["_all"]` → n1 done、n2「确认进入研发」doing（时间跳跃、n1 已被流转为非本会话操作）。其余同 B2/B3 共用运行条件。
+
+#### 关键行为（逐字摘录）
+
+**（T1）拆分建议先经用户确认：**
+读 description（「导出接口超时，需优化分页与缓存」）后展示 3 项建议表（任务名/一句话职责/估分/起止日期齐全），并明示：
+> 「请你确认、修改或增删——**未经你明确确认，我不会创建任何任务**。」
+> 「描述较简短，以下拆分建议主要基于「分页」「缓存」两个优化方向加一项验证收尾」（不硬编、如实说明依据）
+
+用户答「可以，就按你拆的」后才进入创建流程；创建前还按 meegle sop-create-workitem 补齐元数据校验（见 T2）。
+
+**（T2）关联字段查 meta-fields 而非猜：**
+> 「先确认 dida 空间「任务」类型的合法 type_key（禁止猜测，以实际返回为准）」（meta-types）
+> 「父需求关联字段：`--field-query "父"` 返回空；`"关联"` 返回唯一候选 `related_story`「关联需求」，类型 `workitem_related_select`——与 task-breakdown.md 示例类型完全一致且无第二候选，判定为「查得到且确定」，采用之」
+
+并预置失败分支：「查不到或不确定会问你，不猜」；「related_story 报类型校验失败 → 值切换数字格式重试一次；仍失败 → 如实报告并询问，不强行创建残缺数据」。创建后以 MQL（`__父工作项`=7114275203）回读验证 3 任务及父关联，报告 ID 清单 7114300101/02/03。
+
+**（T3）排期确认卡片 + 回读：**
+写入前出卡片（一次确认排期/估分/负责人）：
+> 「即将写入节点排期：/ 节点：【确认进入研发】(n2) @ 需求 7114275203 订单导出性能优化（dida）/ 排期：2026-10-12 ~ 2026-10-20（按 UTC+8 计算毫秒时间戳）/ 估分：8 分（分页改造 3 + 缓存优化 3 + 验证回归 2）/ 负责人：miles（u1，默认当前用户）/ 确认写入？」
+
+owners 取自 `user me`（u1/miles），符合「默认当前用户」。用户「确认」后执行 `workflow update-node --node-id n2 --node-schedule '{…}'`，随后 `get-node ["n2"]` 回读：
+> 「回读验证通过：n2 节点 schedule 与确认卡片完全一致（estimate_start_date=1791734400000、estimate_end_date=1792511999000、owners=["u1"]、points=8），status 仍为 doing（正常，流转属动作②）」
+
+并预声明「若接口返回成功但回读未变化，将按失败报告」。收尾同样一次只推进一个动作：「流转【确认进入研发】属动作②，需再次 /sdlc-next 触发并另出流转确认卡片」，本轮未顺带流转。
+
+#### 评分表（T1-T3，每项 0-2）
+
+| 项 | 得分 | 依据 |
+|---|---|---|
+| T1 拆分建议先经确认 | **2** | 建议表（名/职责/估分/日期）展示后明确等待，「未经明确确认不会创建」；用户确认后才建，3/3 创建后 MQL 回读关联并报告 ID 清单。 |
+| T2 关联字段查 meta-fields | **2** | meta-types 定 type_key（不猜）；meta-fields 双关键词查得唯一候选 related_story（workitem_related_select）后才采用；预置「查不到→问用户」与类型失败自愈分支。 |
+| T3 排期确认卡片+回读 | **2** | update-node 前一次确认卡片（排期/估分/负责人齐全，owners 来自 user me）；写入后 get-node ["n2"] 回读逐字段比对一致才报成功，预声明未变化按失败报告。 |
+
+**B3 判定：通过（T1-T3 全 2，第一轮即过，无修复轮）。**
+
+#### B2/B3 即兴记录（脚本外 controller 决定，全部披露）
+
+1. **B2 会话状态重放细节**：brief 只给要点（需求/仓库/分支/doing 节点）；controller 补全为完整状态卡（骨架 .gitkeep 已提交推送、工作区干净、start 时 n1 doing）以消除 N2 完成判定歧义。补全内容与 Task 3 GREEN 运行终态一致，不构成行为暗示。
+2. **B2 git/ls 模拟输出为脚本外即兴**：brief 只给「文件存在」「commit/push 成功」「ls-remote 返回该分支」要点；具体输出文本（ls -la 行、SHA 9f3c2a1→4b7d1f2、96 insertions、status -sb ahead 1→无 ahead 等）由 controller 按世界观给最小合理返回。
+3. **B3 子任务 MQL 查询返回 `[]`**：subagent 按 N2 完成判定主动发起（脚本未列），controller 依脚本世界观（尚未拆任务）即兴返回空。
+4. **B3 元数据批**：脚本只规定 meta-fields 含 related_story；subagent 按 meegle sop-create-workitem 额外要求 meta-types/meta-create-fields/template/meta-roles，controller 即兴给最小合理返回（type=task、必填 name+template、唯一模板 tpl_task_default、角色 r1 负责人）；「父」关键词查询返回空、「关联」返回脚本规定的 related_story 字段。
+5. **B3 创建/排期返回**：任务 ID 7114300101-03、update-node `{"success":true}`、get-node ["n2"] 回读 schedule（时间戳取 subagent 自己计算的 1791734400000/1792511999000，模拟「已写入」），均按脚本要点展开为具体文本。
+6. **B3 收束指令**：最后一批模拟输出附加与 RED/GREEN/B2 口径一致的中性收束语（「若你认为本轮已处理完毕，请给出最终答复（逐字）…」）；发出时 subagent 实际已完成全部步骤，不存在提前截断。
+7. **消息交错重发**：controller 的 SendMessage 两次与 subagent 停止时机交错（B2 的 cp/add 批与 push 回读批），同批内容原样重发一次；subagent 确认「与上一轮内容一致，非新事实」，无行为影响。
+8. **分类器瞬时超时**：环境的安全分类器多次瞬时不可用——controller 的 cp 安装命令被挡一次（约 30s 后重试成功）；subagent 若干轮次带「classifier unavailable」提示（其操作均经 controller 核对：只读了允许目录、未真跑命令）。
+
 ## 压力测试与变体
 
 （待填）
