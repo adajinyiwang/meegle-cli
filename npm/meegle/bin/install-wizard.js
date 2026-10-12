@@ -165,7 +165,7 @@ function installAgentSkill({ bestEffort = false, runFn = run } = {}) {
   try {
     // Explicit skill list: new skills must be added here deliberately, so we
     // never push an unreviewed skill to all users via `--skill '*'`.
-    runFn("npm", ["exec", "--yes", "--package=skills", "--", "skills", "add", SKILLS_REPO, "-y", "-g", "-s", "sdlc-init", "sdlc-start", "sdlc-next", "sdlc-done", "sdlc-status", "sdlc-update"], { timeout: 120000 });
+    runFn("npm", ["exec", "--yes", "--package=skills", "--", "skills", "add", SKILLS_REPO, "-y", "-g", "-s", "meegle", "sdlc-init", "sdlc-start", "sdlc-next", "sdlc-done", "sdlc-status", "sdlc-update"], { timeout: 120000 });
     return true;
   } catch (err) {
     if (!bestEffort) throw err;

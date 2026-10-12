@@ -17,7 +17,7 @@ npx -y @didatravel-jinyi/meegle@latest install --host project.feishu.cn --lang z
 
 （私有化部署把 `--host` 换成你的租户域名；无浏览器环境加 `--device-code`。）
 
-- 向导一次装好：`meegle` 与 `sdlc` 两个全局命令、6 个 `/sdlc-*` 薄入口 skill、共享规则 `~/.sdlc/skill-core.md`，并引导飞书登录。
+- 向导一次装好：`meegle` 与 `sdlc` 两个全局命令、`meegle` 使用指南技能、6 个 `/sdlc-*` 薄入口 skill、共享规则 `~/.sdlc/skill-core.md`，并引导飞书登录。
 - Windows 装完**重开终端**，cmd/PowerShell 即可直接用 `sdlc`（npm 自动生成 shim）。
 - 装完自检：终端跑 `sdlc doctor`，或在对话里说「工具出问题了」。
 - **首次使用**：第一条需要飞书的命令会转出浏览器飞书授权链接，点一次授权，之后全程自动（凭据由 meegle 官方托管，AI 与工具都碰不到）。

@@ -27,8 +27,8 @@ test("installAgentSkill requests the explicit skill list (6 sdlc-* entries)", ()
   const sIndex = args.indexOf("-s");
   assert.ok(sIndex !== -1, "expected explicit -s skill list");
   assert.deepStrictEqual(
-    args.slice(sIndex + 1, sIndex + 7),
-    ["sdlc-init", "sdlc-start", "sdlc-next", "sdlc-done", "sdlc-status", "sdlc-update"],
+    args.slice(sIndex + 1, sIndex + 8),
+    ["meegle", "sdlc-init", "sdlc-start", "sdlc-next", "sdlc-done", "sdlc-status", "sdlc-update"],
     "expected explicit -s skill list",
   );
 });

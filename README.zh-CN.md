@@ -117,7 +117,7 @@ meegle auth status
 
 ## AI Agent Skill
 
-安装向导会安装 **dida-sdlc** skill 套件（`skills/sdlc-*/`）：6 个薄入口——`/sdlc-init`、`/sdlc-start`、`/sdlc-next`、`/sdlc-done`、`/sdlc-status`、`/sdlc-update`——适用于 Claude Code 等支持 Agent Skills 的助手，由本包内置的 `sdlc` CLI 承载执行（与 `meegle` 一起装为全局命令）。它们把一条飞书项目（Meegle）需求从接手驱动到收尾：绑定需求分支、保存/交接产物、把任务清单同步为飞书子任务、流转工作流节点、归档收尾。所有写动作走 plan → 确认 → apply 两段式协议；飞书访问用你本人的 `meegle` 凭据（keychain 托管）——飞书原生权限即授权边界。
+安装向导会安装 **dida-sdlc** skill 套件（`skills/sdlc-*/`）：6 个薄入口——`/sdlc-init`、`/sdlc-start`、`/sdlc-next`、`/sdlc-done`、`/sdlc-status`、`/sdlc-update`——外加 `meegle` 技能（`skills/meegle/`，meegle CLI 自身的 AI 使用指南），适用于 Claude Code 等支持 Agent Skills 的助手，由本包内置的 `sdlc` CLI 承载执行（与 `meegle` 一起装为全局命令）。它们把一条飞书项目（Meegle）需求从接手驱动到收尾：绑定需求分支、保存/交接产物、把任务清单同步为飞书子任务、流转工作流节点、归档收尾。所有写动作走 plan → 确认 → apply 两段式协议；飞书访问用你本人的 `meegle` 凭据（keychain 托管）——飞书原生权限即授权边界。
 
 向导还会把共享协作手册写入 `~/.sdlc/skill-core.md`（薄入口指向的唯一规则源），每次安装/升级自动刷新，与所装 CLI 版本严格一致。
 

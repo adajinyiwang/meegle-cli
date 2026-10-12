@@ -8,6 +8,12 @@ versioned section on each npm release.
 
 ## [Unreleased]
 
+## [v1.0.27] - 2026-10-12
+
+### Fixed
+
+- Restored the `meegle` agent skill (`skills/meegle/`), mistakenly removed in v1.0.25: it is the meegle CLI's own AI usage guide (work items, workflow transitions, MQL, views, schedules), not one of the retired self-built SDLC orchestration skills. The setup wizard now installs it alongside the six `sdlc-*` thin entries.
+
 ## [v1.0.26] - 2026-10-12
 
 ### Fixed
