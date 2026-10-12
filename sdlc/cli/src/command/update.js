@@ -194,7 +194,7 @@ export async function runUpdate(opts = {}) {
   const dist = distRoot();
   if (!existsSync(dist) || !isDistRepo(dist)) {
     console.error(`当前安装非独立分发仓库（${dist} 的 Git 根不是它自身——开发安装或目录布局异常）。`);
-    console.error('自更新不可用：请从分发仓库重新执行 bash install.sh --tool claude|qoder。');
+    console.error('自更新不可用：npm 分发下请执行 npm i -g @didatravel-jinyi/meegle@latest 后重跑 meegle install --no-auth 重铺薄入口与 skill-core。');
     return 1;
   }
 

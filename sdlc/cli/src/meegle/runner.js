@@ -5,9 +5,49 @@
 // 超时/进程异常/输出不可解析 → external_unknown（待人工核对，不盲重发）。
 // SDLC_MEEGLE_BIN 可覆盖可执行路径（测试隔离用）。
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { SdlcError } from '../errors.js';
 
-const MEEGLE_BIN = () => process.env.SDLC_MEEGLE_BIN || 'meegle';
+// 分发形态：sdlc 与 meegle 同包发布（@didatravel-jinyi/meegle），sdlc 不承担
+// meegle 的安装——安装/升级统一走 meegle 安装向导与 npm。
+// Windows 下 npm 的全局 shim 是 meegle.cmd：Node ≥20.12.2（CVE-2024-27980）拒绝
+// 无 shell spawn .cmd，而开 shell 会让含 & ? 空格 的参数（URL/MQL/JSON）被 cmd.exe
+// 转义破坏。因此 win32 优先定位同包 meegle.js 用当前 node 直跑（meegle.js 内部
+// spawnSync(stdio:inherit) 转发平台 Go 二进制，管道/退出码语义不变）；找不到回退
+// 裸名 'meegle'（POSIX 行为不变；win32 ENOENT → 安装提示，与原语义一致）。
+/** 从给定目录逐级向上找同包 meegle.js 入口（纯函数，测试友好）。 */
+export function findBundledMeegleEntry(fromDir) {
+  let dir = fromDir;
+  for (let depth = 0; depth < 6; depth += 1) {
+    const candidates = [
+      path.join(dir, 'bin', 'meegle.js'),                   // npm 包布局：<pkg>/bin/meegle.js
+      path.join(dir, 'npm', 'meegle', 'bin', 'meegle.js'),  // 仓库布局：<repo>/npm/meegle/bin/meegle.js
+    ];
+    for (const cand of candidates) {
+      try { if (fs.existsSync(cand)) return cand; } catch { /* 跳过不可读目录 */ }
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
+}
+
+let bundledEntry; // 懒查询缓存（undefined=未查过，null=查过没有）
+/** 解析 meegle 可执行形状：{cmd, prefix}——spawn(cmd, [...prefix, ...args])。 */
+function meegleBin() {
+  const override = process.env.SDLC_MEEGLE_BIN;
+  if (override) return { cmd: override, prefix: [] };
+  if (process.platform === 'win32') {
+    if (bundledEntry === undefined) {
+      bundledEntry = findBundledMeegleEntry(path.dirname(fileURLToPath(import.meta.url)));
+    }
+    if (bundledEntry) return { cmd: process.execPath, prefix: [bundledEntry] };
+  }
+  return { cmd: 'meegle', prefix: [] };
+}
 const TIMEOUT_MS = () => Number(process.env.SDLC_MEEGLE_TIMEOUT_MS) || 120_000;
 
 /** meegle 错误信封 code → SdlcError 域（meegle-contract §4） */
@@ -50,7 +90,8 @@ export function meegleInstalled() {
   return new Promise((resolve, reject) => {
     let child;
     try {
-      child = spawn(MEEGLE_BIN(), ['--version'], {
+      const bin = meegleBin();
+      child = spawn(bin.cmd, [...bin.prefix, '--version'], {
         env: { ...process.env, MEEGLE_NO_UPDATE_CHECK: '1' },
         stdio: ['ignore', 'pipe', 'ignore'],
         windowsHide: true,
@@ -73,34 +114,10 @@ export function meegleInstalled() {
 }
 
 /**
- * 代跑 meegle 安装（与 install.sh 同命令；失败不静默——上抛由调用方决定阻塞与否）。
- * @returns {Promise<void>}
- */
-export function installMeegle() {
-  return new Promise((resolve, reject) => {
-    const args = ['-y', '@didatravel-jinyi/meegle@latest', 'install', '--host', 'project.feishu.cn', '--device-code', '--no-skills', '-y'];
-    let child;
-    try {
-      child = spawn('npx', args, { env: { ...process.env, MEEGLE_NO_UPDATE_CHECK: '1' }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, shell: process.platform === 'win32' });
-    } catch (e) {
-      reject(new SdlcError('external_unavailable', `meegle 安装启动失败：${e.message}`));
-      return;
-    }
-    let stderr = '';
-    child.on('error', (e) => reject(new SdlcError('external_unavailable', `meegle 安装失败（npx 不可用）：${e.message}`)));
-    child.stderr.on('data', (d) => { stderr += d; });
-    const timeout = setTimeout(() => { child.kill(); reject(new SdlcError('external_unavailable', 'meegle 安装超时（5 分钟）——请人工执行 bash install.sh 后重试')); }, 300_000);
-    child.on('close', (code) => {
-      clearTimeout(timeout);
-      if (code === 0) return resolve();
-      reject(new SdlcError('external_unavailable', `meegle 安装失败（exit ${code}${stderr ? `：${stderr.slice(0, 200)}` : ''}）——请人工执行 bash install.sh 后重试`));
-    });
-  });
-}
-
-/**
- * 安装与登录一步到位（init/update 尾段用）：未装 → 代跑安装；未登录 → 登录交接。
- * 只输出结论不输出任何凭据；登录失败上抛（调用方如实转述，不阻塞已完成的本地动作）。
+ * 就绪预检 + 登录一步到位（init/update 尾段用）：未装 → 抛错指向 npm 安装向导
+ *（sdlc 与 meegle 同包分发，不代跑安装——安装/升级由 meegle 自身机制负责）；
+ * 未登录 → 登录交接。只输出结论不输出任何凭据；登录失败上抛（调用方如实转述，
+ * 不阻塞已完成的本地动作）。
  * @param {{onUrl?: (url: string) => void, assumeInstalled?: boolean}} [opts]
  * @returns {Promise<{installed: boolean, authenticated: boolean}>}
  */
@@ -109,10 +126,7 @@ export async function ensureMeegleReady(opts = {}) {
   if (!installed) {
     installed = await meegleInstalled();
     if (!installed) {
-      console.log('meegle 未安装——代跑官方安装（约 1-2 分钟，首次会下载依赖）…');
-      await installMeegle();
-      installed = true;
-      console.log('✓ meegle 已安装');
+      throw new SdlcError('external_unavailable', 'meegle 不可用——请先执行 npm i -g @didatravel-jinyi/meegle@latest（或 npx -y @didatravel-jinyi/meegle@latest install --host project.feishu.cn）后重试');
     }
   }
   const auth = await meegleAuthStatus();
@@ -140,7 +154,8 @@ export function runMeegle(args, opts = {}) {
     const full = [...args, '--format', 'json', '--envelope'];
     let child;
     try {
-      child = spawn(MEEGLE_BIN(), full, {
+      const bin = meegleBin();
+      child = spawn(bin.cmd, [...bin.prefix, ...full], {
         env: { ...process.env, MEEGLE_NO_UPDATE_CHECK: '1' },
         stdio: ['ignore', 'pipe', 'pipe'],
         windowsHide: true,
@@ -204,7 +219,8 @@ export async function meegleAuthStatus() {
   return new Promise((resolve, reject) => {
     let child;
     try {
-      child = spawn(MEEGLE_BIN(), ['auth', 'status'], {
+      const bin = meegleBin();
+      child = spawn(bin.cmd, [...bin.prefix, 'auth', 'status'], {
         env: { ...process.env, MEEGLE_NO_UPDATE_CHECK: '1' },
         stdio: ['ignore', 'pipe', 'pipe'],
         windowsHide: true,
@@ -246,7 +262,8 @@ export async function meegleLoginHandshake(opts = {}) {
   const init = await new Promise((resolve, reject) => {
     let child;
     try {
-      child = spawn(MEEGLE_BIN(), ['auth', 'login', '--phase', 'init', '--device-code'], {
+      const bin = meegleBin();
+      child = spawn(bin.cmd, [...bin.prefix, 'auth', 'login', '--phase', 'init', '--device-code'], {
         env: { ...process.env, MEEGLE_NO_UPDATE_CHECK: '1' },
         stdio: ['ignore', 'pipe', 'pipe'],
         windowsHide: true,

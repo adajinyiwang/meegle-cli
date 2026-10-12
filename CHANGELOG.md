@@ -8,6 +8,16 @@ versioned section on each npm release.
 
 ## [Unreleased]
 
+## [v1.0.26] - 2026-10-12
+
+### Fixed
+
+- Windows: `sdlc` can now reach the bundled `meegle` CLI. Node ≥20.12 refuses to spawn npm's `meegle.cmd` shim without a shell (and a shell would mangle URL/MQL/JSON arguments), so the sdlc runner now resolves the sibling `bin/meegle.js` inside the same npm package and runs it with the current Node. POSIX behavior is unchanged and the `SDLC_MEEGLE_BIN` test override still takes priority.
+
+### Removed
+
+- `sdlc` no longer auto-installs meegle via `npx` (`installMeegle` dropped): both CLIs ship in the same package, and install/upgrade is owned by `meegle install` / npm. A missing meegle now fails with a hint to run `npm i -g @didatravel-jinyi/meegle@latest`.
+
 ## [v1.0.25] - 2026-10-10
 
 ### Added
